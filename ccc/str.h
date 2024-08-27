@@ -1,40 +1,34 @@
 #pragma once
 
 #include "primitive.h"
+#include "ref.h"
 #include "meta.h"
-#include "slice.h"
+#include "array.h"
 #include "option.h"
 #include "intrinsics.h"
+#include "cmp.h"
 
 
 /// Bounded string reference.
 typedef struct {
-#ifdef CCC_RESTRICT_REFERENCES
-    char const* restrict ptr;
-#else
-    char const* ptr;
-#endif
+    char ref dat;
     usize len;
 } str;
 
 
-DEF_SLICE(str);
-DEF_OPTION(str);
+DEF_ARRAY(str, str)
+DEF_OPTION(str)
 
 
 /// Mutable bounded string reference.
 typedef struct {
-#ifdef CCC_RESTRICT_REFERENCES
-    char* restrict ptr;
-#else
-    char* ptr;
-#endif
+    char ref_mut dat;
     usize len;
 } str_mut;
 
 
-DEF_SLICE(str_mut);
-DEF_OPTION(str_mut);
+DEF_ARRAY(str_mut, str_mut)
+DEF_OPTION(str_mut)
 
 
 /// Helper for printing `str` and `str_mut`.
@@ -45,7 +39,7 @@ DEF_OPTION(str_mut);
 /// str const s = make_str();
 /// printf(STRF, PSTR(s));
 /// ```
-#define PSTR(s) (int)(s).len, (s).ptr
+#define PSTR(s) (int)(s).len, (s).dat
 /// Format literal for printing `str` and `str_mut`.
 ///
 /// # Example
@@ -61,10 +55,10 @@ DEF_OPTION(str_mut);
 ///
 /// C string literals can be easily converted using this helper.
 INLINE_ALWAYS
-str cstr(char const* const c_str)
+str cstr(char ref const c_str)
 {
     return (str){
-        .ptr = c_str,
+        .dat = c_str,
         .len = ccc_c_str_len(c_str),
     };
 }
@@ -77,7 +71,7 @@ INLINE_ALWAYS
 str str_from_mut(str_mut const s)
 {
     return (str){
-        .ptr = s.ptr,
+        .dat = s.dat,
         .len = s.len,
     };
 }
@@ -88,7 +82,7 @@ INLINE_ALWAYS
 Slice_u8 str_as_bytes(str const self)
 {
     return (Slice_u8){
-        .ptr = (u8 const*)self.ptr,
+        .dat = (u8 ref)self.dat,
         .len = self.len,
     };
 }
@@ -99,7 +93,7 @@ INLINE_ALWAYS
 SliceMut_u8 str_as_bytes_mut(str_mut const self)
 {
     return (SliceMut_u8){
-        .ptr = (u8*)self.ptr,
+        .dat = (u8 ref_mut)self.dat,
         .len = self.len,
     };
 }
@@ -110,7 +104,7 @@ INLINE_ALWAYS
 str str_from_bytes(Slice_u8 const bytes)
 {
     return (str){
-        .ptr = (char const*)bytes.ptr,
+        .dat = (char ref)bytes.dat,
         .len = bytes.len,
     };
 }
@@ -121,7 +115,7 @@ INLINE_ALWAYS
 str_mut str_from_bytes_mut(SliceMut_u8 const bytes)
 {
     return (str_mut){
-        .ptr = (char*)bytes.ptr,
+        .dat = (char ref_mut)bytes.dat,
         .len = bytes.len,
     };
 }
@@ -138,7 +132,7 @@ bool str_eq(str const a, str const b)
     Slice_u8 const a_bytes = str_as_bytes(a);
     Slice_u8 const b_bytes = str_as_bytes(b);
 
-    return ccc_mem_eq(a_bytes.ptr, b_bytes.ptr, a_bytes.len);
+    return ccc_mem_eq(a_bytes.dat, b_bytes.dat, a_bytes.len);
 }
 
 
@@ -155,12 +149,12 @@ StrSplit str_split_at(str const self, usize const idx)
     ASSERT_MSG(idx <= self.len, "index out of bounds");
 
     return (StrSplit){
-        ._0 = (str){
-            .ptr = self.ptr,
+        ._0 = {
+            .dat = self.dat,
             .len = idx,
         },
-        ._1 = (str){
-            .ptr = self.ptr + idx,
+        ._1 = {
+            .dat = self.dat + idx,
             .len = self.len - idx,
         },
     };
@@ -190,12 +184,12 @@ StrSplitMut str_split_mut_at(str_mut const self, usize const idx)
     ASSERT_MSG(idx <= self.len, "index out of bounds");
 
     return (StrSplitMut){
-        ._0 = (str_mut){
-            .ptr = self.ptr,
+        ._0 = {
+            .dat = self.dat,
             .len = idx,
         },
-        ._1 = (str_mut){
-            .ptr = self.ptr + idx,
+        ._1 = {
+            .dat = self.dat + idx,
             .len = self.len - idx,
         },
     };
@@ -207,12 +201,12 @@ inline
 Option_usize str_find_char(str const self, char const c)
 {
     for (usize i = 0; i < self.len; i++) {
-        if (self.ptr[i] == c) {
-            return (Option_usize) wrap_some(i);
+        if (self.dat[i] == c) {
+            return (Option_usize) SOME(i);
         }
     }
 
-    return (Option_usize) none;
+    return (Option_usize) NONE;
 }
 
 
@@ -221,13 +215,13 @@ inline
 Option_usize str_find(str const self, bool (* const predicate)(char, usize))
 {
     for (usize i = 0; i < self.len; i++) {
-        bool const result = predicate(self.ptr[i], i);
-        if (result) {
-            return (Option_usize) wrap_some(i);
+        bool const found = predicate(self.dat[i], i);
+        if (found) {
+            return (Option_usize) SOME(i);
         }
     }
 
-    return (Option_usize) none;
+    return (Option_usize) NONE;
 }
 
 
@@ -235,12 +229,12 @@ Option_usize str_find(str const self, bool (* const predicate)(char, usize))
 INLINE_ALWAYS
 str str_slice(str const self, usize const start, usize const end)
 {
-    usize const checked_end = end >= start ? end : start;
+    usize const checked_end = usize_max(start, end);
 
     ASSERT_MSG(checked_end <= self.len, "slice out of bounds");
 
     return (str){
-        .ptr = self.ptr + start,
+        .dat = self.dat + start,
         .len = checked_end - start,
     };
 }
@@ -250,12 +244,12 @@ str str_slice(str const self, usize const start, usize const end)
 INLINE_ALWAYS
 str_mut str_slice_mut(str_mut const self, usize const start, usize const end)
 {
-    usize const checked_end = end >= start ? end : start;
+    usize const checked_end = usize_max(start, end);
 
     ASSERT_MSG(checked_end <= self.len, "slice out of bounds");
 
     return (str_mut){
-        .ptr = self.ptr + start,
+        .dat = self.dat + start,
         .len = checked_end - start,
     };
 }
@@ -265,12 +259,12 @@ str_mut str_slice_mut(str_mut const self, usize const start, usize const end)
 INLINE_ALWAYS
 str str_slice_incl(str const self, usize const start, usize const end)
 {
-    usize const checked_end = end >= start ? end : start;
+    usize const checked_end = usize_max(start, end);
 
     ASSERT_MSG(checked_end < self.len, "slice out of bounds");
 
     return (str){
-        .ptr = self.ptr + start,
+        .dat = self.dat + start,
         .len = checked_end - start + 1,
     };
 }
@@ -284,12 +278,28 @@ str_mut str_slice_incl_mut(
     usize const end
 )
 {
-    usize const checked_end = end >= start ? end : start;
+    usize const checked_end = usize_max(start, end);
 
     ASSERT_MSG(checked_end < self.len, "slice out of bounds");
 
     return (str_mut){
-        .ptr = self.ptr + start,
+        .dat = self.dat + start,
         .len = checked_end - start + 1,
     };
 }
+
+
+#ifdef CCC_IMPLEMENTATION
+str cstr(char ref c_str);
+str str_from_mut(str_mut s);
+Slice_u8 str_as_bytes(str s);
+SliceMut_u8 str_as_bytes_mut(str_mut s);
+str str_from_bytes(Slice_u8 bytes);
+str_mut str_from_bytes_mut(SliceMut_u8 bytes);
+bool str_eq(str a, str b);
+StrSplit str_split_from_mut(StrSplitMut split);
+StrSplit str_split_at(str s, usize idx);
+StrSplitMut str_split_mut_at(str_mut s, usize idx);
+str str_slice_incl(str self, usize start, usize end);
+str_mut str_slice_incl_mut(str_mut self, usize start, usize end);
+#endif

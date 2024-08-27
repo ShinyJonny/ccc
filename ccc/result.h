@@ -19,7 +19,7 @@ typedef struct NODISCARD {     \
     #define try(expr, RET_T) ({                  \
         __auto_type const in_var = (expr);       \
         if (in_var.is_err) {                     \
-            return (RET_T) wrap_err(in_var.err); \
+            return (RET_T) ERR(in_var.err);      \
         }                                        \
         in_var.ok;                               \
     })
@@ -36,14 +36,14 @@ typedef struct NODISCARD {     \
 
 
 /// Wraps the supplied *error* value in a result.
-#define wrap_err(...) {   \
-    .is_err = true,       \
-    .err = __VA_ARGS__,   \
+#define ERR(...) {      \
+    .is_err = true,     \
+    .err = __VA_ARGS__, \
 }
 
 
 /// Wraps the supplied *ok* value in a result.
-#define wrap_ok(...) {   \
-    .is_err = false,     \
-    .ok = __VA_ARGS__,   \
+#define OK(...) {      \
+    .is_err = false,   \
+    .ok = __VA_ARGS__, \
 }

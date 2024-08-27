@@ -3,6 +3,13 @@
 
 #include <assert.h>
 
+#define CCC_STRINGIFY(...) #__VA_ARGS__
+
+// Reserved keywords.
+#define unsafe    _Pragma("ccc unsafe")
+#define life(...) _Pragma(CCC_STRINGIFY(ccc lifetime(__VA_ARGS__)))
+#define COPY      _Pragma("ccc set_trait(COPY)")
+
 
 #ifdef __GNUC__
     #define INLINE_ALWAYS __attribute__((always_inline)) inline
@@ -12,10 +19,11 @@
 
 #if __STDC_VERSION__ >= 202000L
     #define NODISCARD [[nodiscard]]
+// NOTE: gcc doesn't like `warn_unused_result` on types.
 #elif defined(__clang__)
     #define NODISCARD __attribute__((warn_unused_result))
 #else
-    #define NODISCARD
+    #define NODISCARD _Pragma("ccc nodiscard")
 #endif
 
 #if __STDC_VERSION__ >= 202000L
@@ -24,6 +32,7 @@
     #define STATIC_ASSERT(expr, msg) _Static_assert(expr, msg)
 #endif
 
+// TODO: check if these really are just compiler hints.
 #if __STDC_VERSION__ >= 202000L
     #include <stddef.h>
     #define HINT_UNREACHABLE() unreachable()

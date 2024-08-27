@@ -1,50 +1,52 @@
 #pragma once
 
-#include "slice.h"
+#include "array.h"
 #include "primitive.h"
 
 
 /// Creates a bit field with the length enough to hold `count` bits.
 #define bit_field(count, ...)                            \
-{                                                        \
+((BitField){                                             \
     .bytes = array(u8, ((count) + 7) >> 3, __VA_ARGS__), \
-}
+})
 
 
 typedef struct {
-    SliceMut_u8 bytes;
+    Array_u8 bytes;
 } BitField;
 
 
 inline
-bool bit_field_can_index(BitField const self, usize const bit)
+bool bit_field_can_index(BitField ref const self, usize const bit)
 {
-    return (bit >> 3) < self.bytes.len;
+    return (bit >> 3) < self->bytes.len;
 }
 
 
 inline
-bool bit_field_has_capacity_for(BitField const self, usize const bits)
+bool bit_field_has_capacity_for(BitField ref const self, usize const bits)
 {
-    return ((bits + 7) >> 3) <= self.bytes.len;
+    return ((bits + 7) >> 3) <= self->bytes.len;
 }
 
 
 inline
 bool bit_field_get_composite(
-    BitField const self,
+    BitField ref const self,
     usize const byte,
     usize const bit
 )
 {
-    ASSERT_MSG(byte < self.bytes.len, "index out of bounds");
+    Slice_u8 const bytes = array_u8_as_ref(&self->bytes);
 
-    return ((self.bytes.ptr[byte] >> bit) & (u8)0x01) == 1;
+    ASSERT_MSG(byte < bytes.len, "index out of bounds");
+
+    return ((bytes.dat[byte] >> bit) & (u8)0x01) == 1;
 }
 
 
 INLINE_ALWAYS
-bool bit_field_get(BitField const self, usize const pos)
+bool bit_field_get(BitField ref const self, usize const pos)
 {
     usize const byte = pos >> 3;
     usize const bit  = pos - (byte << 3);
@@ -55,42 +57,21 @@ bool bit_field_get(BitField const self, usize const pos)
 
 inline
 void bit_field_set_composite(
-    BitField const self,
+    BitField ref_mut const self,
     usize const byte,
     usize const bit
 )
 {
-    ASSERT_MSG(byte < self.bytes.len, "index out of bounds");
+    SliceMut_u8 const bytes = array_u8_as_mut(&self->bytes);
 
-    self.bytes.ptr[byte] |= ((u8)0x01 << bit);
+    ASSERT_MSG(byte < bytes.len, "index out of bounds");
+
+    bytes.dat[byte] |= ((u8)0x01 << bit);
 }
 
 
 INLINE_ALWAYS
-void bit_field_set(BitField const self, usize const pos)
-{
-    usize const byte = pos >> 3;
-    usize const bit  = pos - (byte << 3);
-
-    bit_field_set_composite(self, byte, bit);
-}
-
-
-inline
-void bit_field_flip_composite(
-    BitField const self,
-    usize const byte,
-    usize const bit
-)
-{
-    ASSERT_MSG(byte < self.bytes.len, "index out of bounds");
-
-    self.bytes.ptr[byte] |= ((u8)0x01 << bit);
-}
-
-
-INLINE_ALWAYS
-void bit_field_flip(BitField const self, usize const pos)
+void bit_field_set(BitField ref_mut const self, usize const pos)
 {
     usize const byte = pos >> 3;
     usize const bit  = pos - (byte << 3);
@@ -101,19 +82,21 @@ void bit_field_flip(BitField const self, usize const pos)
 
 inline
 void bit_field_clear_composite(
-    BitField const self,
+    BitField ref_mut const self,
     usize const byte,
     usize const bit
 )
 {
-    ASSERT_MSG(byte < self.bytes.len, "index out of bounds");
+    SliceMut_u8 const bytes = array_u8_as_mut(&self->bytes);
 
-    self.bytes.ptr[byte] &= ~(0x01 << bit);
+    ASSERT_MSG(byte < bytes.len, "index out of bounds");
+
+    bytes.dat[byte] &= ~(0x01 << bit);
 }
 
 
 INLINE_ALWAYS
-void bit_field_clear(BitField const self, usize const pos)
+void bit_field_clear(BitField ref_mut const self, usize const pos)
 {
     usize const byte = pos >> 3;
     usize const bit  = pos - (byte << 3);
@@ -123,14 +106,32 @@ void bit_field_clear(BitField const self, usize const pos)
 
 
 inline
-void bit_field_clear_all(BitField const self)
+void bit_field_clear_all(BitField ref_mut const self)
 {
-    bytes_fill(self.bytes, 0x00);
+    SliceMut_u8 const bytes = array_u8_as_mut(&self->bytes);
+
+    slice_u8_fill(bytes, 0x00);
 }
 
 
 inline
-void bit_field_set_all(BitField const self)
+void bit_field_set_all(BitField ref_mut const self)
 {
-    bytes_fill(self.bytes, 0xff);
+    SliceMut_u8 const bytes = array_u8_as_mut(&self->bytes);
+
+    slice_u8_fill(bytes, 0xff);
 }
+
+
+#ifdef CCC_IMPLEMENTATION
+bool bit_field_can_index(BitField ref self, usize bit);
+bool bit_field_has_capacity_for(BitField ref self, usize bits);
+bool bit_field_get_composite(BitField ref self, usize byte, usize bit);
+bool bit_field_get(BitField ref self, usize pos);
+void bit_field_set_composite(BitField ref_mut self, usize byte, usize bit);
+void bit_field_set(BitField ref_mut self, usize pos);
+void bit_field_clear_composite(BitField ref_mut self, usize byte, usize bit);
+void bit_field_clear(BitField ref_mut self, usize pos);
+void bit_field_clear_all(BitField ref_mut self);
+void bit_field_set_all(BitField ref_mut self);
+#endif

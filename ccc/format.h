@@ -32,8 +32,9 @@ DEF_RESULT(FmtResult, __unit, FmtError);
 /// pointer to the implementation of this interface is passed as part of
 /// `RefFormatter` to every function working with formatters.
 typedef struct {
-    FmtResult (* const write_str)(RefMut ctx, str s);
-    FmtResult (* const write_char)(RefMut ctx, char c);
+    VTableHdr hdr;
+    FmtResult (* const write_str)(void ref_mut ctx, str s);
+    FmtResult (* const write_char)(void ref_mut, char c);
 } Formatter;
 
 
@@ -53,7 +54,7 @@ DEF_DYN_REF_MUT(Formatter);
 INLINE_ALWAYS
 FmtResult fmt_write_str(DynRefMut_Formatter const f, str const s)
 {
-    return f.iface->write_str((RefMut)as_ref(f), s);
+    return f.vtable->write_str(f.dst, s);
 }
 
 
@@ -61,13 +62,13 @@ FmtResult fmt_write_str(DynRefMut_Formatter const f, str const s)
 INLINE_ALWAYS
 FmtResult fmt_write_char(DynRefMut_Formatter const f, char const c)
 {
-    return f.iface->write_char((RefMut)as_ref(f), c);
+    return f.vtable->write_char(f.dst, c);
 }
 
 // NOTE: this will never be inline due to the use of va args.
 FmtResult fmt_write_fmt(
     DynRefMut_Formatter const f,
-    char const* const restrict format,
+    char ref const format,
     ...
 );
 
@@ -97,7 +98,7 @@ FmtResult u64_fmt(DynRefMut_Formatter const f, u64 num)
     }
 
     str const s = (str){
-        .ptr = buf + __fmt_buf_cap - len,
+        .dat = buf + __fmt_buf_cap - len,
         .len = len,
     };
 
@@ -215,7 +216,7 @@ FmtResult str_fmt_dbg(DynRefMut_Formatter const f, str const s)
     if ((res = fmt_write_str(f, s)   ).is_err) { return res; }
     if ((res = fmt_write_char(f, '"')).is_err) { return res; }
 
-    return (FmtResult) wrap_ok(unit);
+    return (FmtResult) OK(unit);
 }
 
 
@@ -237,7 +238,7 @@ FmtResult str_split_fmt_dbg(DynRefMut_Formatter const f, StrSplit const split)
 INLINE_ALWAYS
 FmtResult fmt_error_fmt_dbg(
     DynRefMut_Formatter const f,
-    FmtError const* const e
+    FmtError ref const e
 )
 {
     switch (e->kind) {
@@ -263,3 +264,25 @@ FmtResult fmt_error_fmt_dbg(
 
     DEBUG_UNREACHABLE();
 }
+
+
+#ifdef CCC_IMPLEMENTATION
+FmtResult fmt_write_str(DynRefMut_Formatter f, str s);
+FmtResult fmt_write_char(DynRefMut_Formatter f, char c);
+FmtResult u64_fmt(DynRefMut_Formatter f, u64 num);
+FmtResult u32_fmt(DynRefMut_Formatter f, u32 num);
+FmtResult u16_fmt(DynRefMut_Formatter f, u16 num);
+FmtResult u8_fmt(DynRefMut_Formatter f, u8 num);
+FmtResult i64_fmt(DynRefMut_Formatter f, i64 num);
+FmtResult i32_fmt(DynRefMut_Formatter f, i32 num);
+FmtResult i16_fmt(DynRefMut_Formatter f, i16 num);
+FmtResult i8_fmt(DynRefMut_Formatter f, i8 num);
+FmtResult usize_fmt(DynRefMut_Formatter f, usize num);
+FmtResult isize_fmt(DynRefMut_Formatter f, isize num);
+FmtResult bool_fmt(DynRefMut_Formatter f, bool b);
+FmtResult __unit_fmt_dbg(DynRefMut_Formatter f, __unit _);
+FmtResult str_fmt(DynRefMut_Formatter f, str s);
+FmtResult str_fmt_dbg(DynRefMut_Formatter f, str s);
+FmtResult str_split_fmt_dbg(DynRefMut_Formatter f, StrSplit split);
+FmtResult fmt_error_fmt_dbg(DynRefMut_Formatter f, FmtError ref e);
+#endif

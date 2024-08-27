@@ -10,7 +10,7 @@
 
 typedef struct { usize idx; } SlotListId;
 
-DEF_OPTION(SlotListId);
+DEF_OPTION(SlotListId)
 
 #define SL_ID_INVALID      ((SlotListId){ .idx = USIZE_MAX })
 #define sl_id_is_valid(id) ((id).idx != SL_ID_INVALID.idx)
@@ -29,28 +29,25 @@ typedef struct {
     SlotListId next;
 } SlotListLinks;
 
-DEF_SLICE(SlotListLinks);
+DEF_ARRAY(SlotListLinks, slot_list_links)
 
 
 typedef struct {
-    SlotListId             head;
-    SlotListId             tail;
-    BitField               usage_map;
-    SliceMut_SlotListLinks links;
+    SlotListId          head;
+    SlotListId          tail;
+    BitField            usage_map;
+    Array_SlotListLinks links;
 } SlotList;
 
 INLINE_ALWAYS
-SlotList slot_list_create(
-    BitField const usage_map,
-    SliceMut_SlotListLinks const links
-)
+SlotList slot_list_create(BitField usage_map, Array_SlotListLinks const links)
 {
     ASSERT_MSG(
-        bit_field_has_capacity_for(usage_map, links.len),
+        bit_field_has_capacity_for(&usage_map, links.len),
         "invalid length of `BifField`"
     );
 
-    bit_field_clear_all(usage_map);
+    bit_field_clear_all(&usage_map);
 
     return (SlotList){
         .head      = SL_ID_INVALID,
@@ -61,263 +58,277 @@ SlotList slot_list_create(
 }
 
 inline
-Option_SlotListId slot_list_next(
-    SlotList const* const self,
-    SlotListId const id
-)
+Option_SlotListId slot_list_next(SlotList ref const self, SlotListId const id)
 {
     ASSERT_MSG(
-        bit_field_can_index(self->usage_map, id.idx),
+        bit_field_can_index(&self->usage_map, id.idx),
         "ID out of bounds"
     );
-    ASSERT_MSG(bit_field_get(self->usage_map, id.idx), "invalid ID");
+    ASSERT_MSG(bit_field_get(&self->usage_map, id.idx), "invalid ID");
 
-    SlotListId const next_id = self->links.ptr[id.idx].next;
+    Slice_SlotListLinks const links
+        = array_slot_list_links_as_ref(&self->links);
+
+    SlotListId const next_id = links.dat[id.idx].next;
     if (!sl_id_is_valid(next_id)) {
-        return (Option_SlotListId) none;
+        return (Option_SlotListId) NONE;
     }
 
-    return (Option_SlotListId) wrap_some(next_id);
+    return (Option_SlotListId) SOME(next_id);
 }
 
 inline
-Option_SlotListId slot_list_prev(
-    SlotList const* const self,
-    SlotListId const id
-)
+Option_SlotListId slot_list_prev(SlotList ref const self, SlotListId const id)
 {
     ASSERT_MSG(
-        bit_field_can_index(self->usage_map, id.idx),
+        bit_field_can_index(&self->usage_map, id.idx),
         "ID out of bounds"
     );
-    ASSERT_MSG(bit_field_get(self->usage_map, id.idx), "invalid ID");
+    ASSERT_MSG(bit_field_get(&self->usage_map, id.idx), "invalid ID");
 
-    SlotListId const prev_id = self->links.ptr[id.idx].prev;
+    Slice_SlotListLinks const links
+        = array_slot_list_links_as_ref(&self->links);
+
+    SlotListId const prev_id = links.dat[id.idx].prev;
     if (!sl_id_is_valid(prev_id)) {
-        return (Option_SlotListId) none;
+        return (Option_SlotListId) NONE;
     }
 
-    return (Option_SlotListId) wrap_some(prev_id);
+    return (Option_SlotListId) SOME(prev_id);
 }
 
 inline
-Option_SlotListId _slot_list_allocate(SlotList* const self)
+Option_SlotListId _slot_list_allocate(SlotList ref_mut const self)
 {
     SlotListId new_id = SL_ID_INVALID;
     for (usize i = 0; i < self->links.len; i++) {
-        if (!bit_field_get(self->usage_map, i)) {
+        if (!bit_field_get(&self->usage_map, i)) {
             new_id = (SlotListId){ .idx = i };
             break;
         }
     }
 
     if (!sl_id_is_valid(new_id)) {
-        return (Option_SlotListId) none;
+        return (Option_SlotListId) NONE;
     }
 
-    bit_field_set(self->usage_map, new_id.idx);
+    bit_field_set(&self->usage_map, new_id.idx);
 
-    return (Option_SlotListId) wrap_some(new_id);
+    return (Option_SlotListId) SOME(new_id);
 }
 
 inline
-SlotListIdResult slot_list_append(SlotList* const self)
+SlotListIdResult slot_list_append(SlotList ref_mut const self)
 {
     Option_SlotListId const opt_new_id = _slot_list_allocate(self);
     if (!opt_new_id.is_some) {
-        return (SlotListIdResult) wrap_err(SlotListCapacityExceeded);
+        return (SlotListIdResult) ERR(SlotListCapacityExceeded);
     }
 
     SlotListId const new_id = opt_new_id.val;
 
-    self->links.ptr[new_id.idx] = (SlotListLinks){
+    SliceMut_SlotListLinks const links
+        = array_slot_list_links_as_mut(&self->links);
+
+    links.dat[new_id.idx] = (SlotListLinks){
         .prev = self->tail,
         .next = SL_ID_INVALID,
     };
 
     if (sl_id_is_valid(self->tail)) {
-        self->links.ptr[self->tail.idx].next = new_id;
+        links.dat[self->tail.idx].next = new_id;
     } else {
         self->head = new_id;
     }
 
     self->tail = new_id;
 
-    return (SlotListIdResult) wrap_ok(new_id);
+    return (SlotListIdResult) OK(new_id);
 }
 
 inline
-SlotListIdResult slot_list_prepend(SlotList* const self)
+SlotListIdResult slot_list_prepend(SlotList ref_mut const self)
 {
     Option_SlotListId const opt_new_id = _slot_list_allocate(self);
     if (!opt_new_id.is_some) {
-        return (SlotListIdResult) wrap_err(SlotListCapacityExceeded);
+        return (SlotListIdResult) ERR(SlotListCapacityExceeded);
     }
 
     SlotListId const new_id = opt_new_id.val;
 
-    self->links.ptr[new_id.idx] = (SlotListLinks){
+    SliceMut_SlotListLinks const links
+        = array_slot_list_links_as_mut(&self->links);
+
+    links.dat[new_id.idx] = (SlotListLinks){
         .prev = SL_ID_INVALID,
         .next = self->head,
     };
 
     if (sl_id_is_valid(self->head)) {
-        self->links.ptr[self->head.idx].prev = new_id;
+        links.dat[self->head.idx].prev = new_id;
     } else {
         self->tail = new_id;
     }
 
     self->head = new_id;
 
-    return (SlotListIdResult) wrap_ok(new_id);
+    return (SlotListIdResult) OK(new_id);
 }
 
 inline
 SlotListIdResult slot_list_insert_after(
-    SlotList* const self,
+    SlotList ref_mut const self,
     SlotListId const prev_id
 )
 {
     ASSERT_MSG(
-        bit_field_can_index(self->usage_map, prev_id.idx),
+        bit_field_can_index(&self->usage_map, prev_id.idx),
         "ID out of bounds"
     );
-    ASSERT_MSG(bit_field_get(self->usage_map, prev_id.idx), "invalid ID");
+    ASSERT_MSG(bit_field_get(&self->usage_map, prev_id.idx), "invalid ID");
 
-    SlotListLinks* const prev_slot = &self->links.ptr[prev_id.idx];
+    SliceMut_SlotListLinks const links
+        = array_slot_list_links_as_mut(&self->links);
 
     Option_SlotListId const opt_new_id = _slot_list_allocate(self);
     if (!opt_new_id.is_some) {
-        return (SlotListIdResult) wrap_err(SlotListCapacityExceeded);
+        return (SlotListIdResult) ERR(SlotListCapacityExceeded);
     }
 
     SlotListId const new_id = opt_new_id.val;
+    SlotListId const new_next_id = links.dat[prev_id.idx].next;
 
-    self->links.ptr[new_id.idx] = (SlotListLinks){
+    links.dat[new_id.idx] = (SlotListLinks){
         .prev = prev_id,
-        .next = prev_slot->next,
+        .next = new_next_id,
     };
 
-    prev_slot->next = new_id;
+    links.dat[prev_id.idx].next = new_id;
 
     if (self->tail.idx == prev_id.idx) {
         self->tail = new_id;
     }
 
-    return (SlotListIdResult) wrap_ok(new_id);
+    return (SlotListIdResult) OK(new_id);
 }
 
 inline
 SlotListIdResult slot_list_insert_before(
-    SlotList* const self,
+    SlotList ref_mut const self,
     SlotListId const next_id
 )
 {
     ASSERT_MSG(
-        bit_field_can_index(self->usage_map, next_id.idx),
+        bit_field_can_index(&self->usage_map, next_id.idx),
         "ID out of bounds"
     );
-    ASSERT_MSG(bit_field_get(self->usage_map, next_id.idx), "invalid ID");
+    ASSERT_MSG(bit_field_get(&self->usage_map, next_id.idx), "invalid ID");
 
-    SlotListLinks* const next_slot = &self->links.ptr[next_id.idx];
+    SliceMut_SlotListLinks const links
+        = array_slot_list_links_as_mut(&self->links);
 
     Option_SlotListId const opt_new_id = _slot_list_allocate(self);
     if (!opt_new_id.is_some) {
-        return (SlotListIdResult) wrap_err(SlotListCapacityExceeded);
+        return (SlotListIdResult) ERR(SlotListCapacityExceeded);
     }
 
     SlotListId const new_id = opt_new_id.val;
+    SlotListId const new_prev = links.dat[next_id.idx].prev;
 
-    self->links.ptr[new_id.idx] = (SlotListLinks){
-        .prev = next_slot->prev,
+    links.dat[new_id.idx] = (SlotListLinks){
+        .prev = new_prev,
         .next = next_id,
     };
 
-    next_slot->prev = new_id;
+    links.dat[next_id.idx].prev = new_id;
 
     if (self->head.idx == next_id.idx) {
         self->head = new_id;
     }
 
-    return (SlotListIdResult) wrap_ok(new_id);
+    return (SlotListIdResult) OK(new_id);
 }
 
 inline
-void slot_list_remove(
-    SlotList* const self,
-    SlotListId const id
-)
+void slot_list_remove(SlotList ref_mut const self, SlotListId const id)
 {
     ASSERT_MSG(
-        bit_field_can_index(self->usage_map, id.idx),
+        bit_field_can_index(&self->usage_map, id.idx),
         "ID out of bounds"
     );
-    ASSERT_MSG(bit_field_get(self->usage_map, id.idx), "invalid ID");
+    ASSERT_MSG(bit_field_get(&self->usage_map, id.idx), "invalid ID");
 
-    bit_field_clear(self->usage_map, id.idx);
-    SlotListLinks* const slot  = &self->links.ptr[id.idx];
+    bit_field_clear(&self->usage_map, id.idx);
+
+    SliceMut_SlotListLinks const links
+        = array_slot_list_links_as_mut(&self->links);
+
+    SlotListLinks const slot = links.dat[id.idx];
 
     if (self->head.idx == id.idx) {
-        self->head = slot->next;
+        self->head = slot.next;
     }
 
     if (self->tail.idx == id.idx) {
-        self->tail = slot->prev;
+        self->tail = slot.prev;
     }
 
-    if (sl_id_is_valid(slot->next)) {
-        self->links.ptr[slot->next.idx].prev = slot->prev;
+    if (sl_id_is_valid(slot.next)) {
+        links.dat[slot.next.idx].prev = slot.prev;
     }
 
-    if (sl_id_is_valid(slot->prev)) {
-        self->links.ptr[slot->prev.idx].next = slot->next;
+    if (sl_id_is_valid(slot.prev)) {
+        links.dat[slot.prev.idx].next = slot.next;
     }
 }
 
 inline
-Option_SlotListId slot_list_pop_head(SlotList* const self)
+Option_SlotListId slot_list_pop_head(SlotList ref_mut const self)
 {
     if (!sl_id_is_valid(self->head)) {
-        return (Option_SlotListId) none;
+        return (Option_SlotListId) NONE;
     }
 
     SlotListId const id = self->head;
     slot_list_remove(self, id);
 
-    return (Option_SlotListId) wrap_some(id);
+    return (Option_SlotListId) SOME(id);
 }
 
 inline
-Option_SlotListId slot_list_pop_tail(SlotList* const self)
+Option_SlotListId slot_list_pop_tail(SlotList ref_mut const self)
 {
     if (!sl_id_is_valid(self->tail)) {
-        return (Option_SlotListId) none;
+        return (Option_SlotListId) NONE;
     }
 
     SlotListId const id = self->tail;
     slot_list_remove(self, id);
 
-    return (Option_SlotListId) wrap_some(id);
+    return (Option_SlotListId) SOME(id);
 }
 
 INLINE_ALWAYS
 FmtResult slot_list_fmt_dbg(
     DynRefMut_Formatter const f,
-    SlotList const* const list
+    SlotList ref const list
 )
 {
+    Slice_SlotListLinks const links
+        = array_slot_list_links_as_ref(&list->links);
+
     FmtResult res;
     if ((res = fmt_write_char(f, '[')).is_err) { return res; }
 
     if (sl_id_is_valid(list->head)) {
         if ((res = usize_fmt(f, list->head.idx)).is_err) { return res; }
 
-        SlotListId next = list->links.ptr[list->head.idx].next;
+        SlotListId next = links.dat[list->head.idx].next;
         while (sl_id_is_valid(next)) {
             if ((res = fmt_write_str(f, cstr(" -> "))).is_err) { return res; }
             if ((res = usize_fmt(f, next.idx)).is_err)         { return res; }
 
-            next = list->links.ptr[next.idx].next;
+            next = links.dat[next.idx].next;
         }
     }
 
@@ -326,3 +337,14 @@ FmtResult slot_list_fmt_dbg(
 
 #undef SL_ID_INVALID
 #undef sl_id_is_valid
+
+
+#ifdef CCC_COLL_IMPLEMENTATION
+SlotList slot_list_create(BitField usage_map, Array_SlotListLinks links);
+Option_SlotListId slot_list_next(SlotList ref self, SlotListId id);
+Option_SlotListId slot_list_prev(SlotList ref self, SlotListId id);
+Option_SlotListId _slot_list_allocate(SlotList ref_mut self);
+SlotListIdResult slot_list_append(SlotList ref_mut self);
+SlotListIdResult slot_list_prepend(SlotList ref_mut self);
+FmtResult slot_list_fmt_dbg(DynRefMut_Formatter f, SlotList ref list);
+#endif

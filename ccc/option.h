@@ -8,34 +8,40 @@
 typedef struct NODISCARD {           \
     bool is_some;                    \
     type val;                        \
-} name
+} name;
 #define DEF_OPTION(type) DEF_OPTION_NAMED(type, Option_##type)
 
 
-DEF_OPTION(u8);
-DEF_OPTION(i8);
-DEF_OPTION(u16);
-DEF_OPTION(i16);
-DEF_OPTION(u32);
-DEF_OPTION(i32);
-DEF_OPTION(u64);
-DEF_OPTION(i64);
+DEF_OPTION(u8)
+DEF_OPTION(i8)
+DEF_OPTION(u16)
+DEF_OPTION(i16)
+DEF_OPTION(u32)
+DEF_OPTION(i32)
+DEF_OPTION(u64)
+DEF_OPTION(i64)
 
-DEF_OPTION(usize);
-DEF_OPTION(isize);
+DEF_OPTION(usize)
+DEF_OPTION(isize)
+DEF_OPTION(uptr)
+DEF_OPTION(iptr)
 
-DEF_OPTION(bool);
+DEF_OPTION(f32)
+DEF_OPTION(f64)
+
+DEF_OPTION(bool)
+DEF_OPTION_NAMED(__unit, Option_)
 
 
 /// Wraps the supplied *some* value in an option.
-#define wrap_some(...) {  \
+#define SOME(...) {       \
     .is_some = true,      \
     .val = (__VA_ARGS__), \
 }
 
 
 /// Returns the *none* variant of an option.
-#define none { .is_some = false, }
+#define NONE { .is_some = false, }
 
 
 #ifdef CCC_ENABLE_GNU_FEATURES
@@ -43,7 +49,7 @@ DEF_OPTION(bool);
     #define try_opt(expr, RET_T) ({  \
         __auto_type in_var = (expr); \
         if (!in_var.is_some) {       \
-            return (RET_T) none;     \
+            return (RET_T) NONE;     \
         }                            \
         in_var.val;                  \
     })

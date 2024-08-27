@@ -6,70 +6,70 @@
 #include <stdint.h> /// NOTE: used only for `SIZE_MAX`.
 
 
-#define U8MAX   (256ULL)
-#define U8MIN   (0ULL)
-#define U16MAX  (65535ULL)
-#define U16MIN  (0ULL)
-#define U32MAX  (4294967295ULL)
-#define U32MIN  (0ULL)
-#define U64MAX  (18446744073709551615ULL)
-#define U64MIN  (0ULL)
+#define U8_MAX   (256ULL)
+#define U8_MIN   (0ULL)
+#define U16_MAX  (65535ULL)
+#define U16_MIN  (0ULL)
+#define U32_MAX  (4294967295ULL)
+#define U32_MIN  (0ULL)
+#define U64_MAX  (18446744073709551615ULL)
+#define U64_MIN  (0ULL)
 
-#define I8MAX   (127LL)
-#define I8MIN   (-I8MAX -1)
-#define I16MAX  (32767LL)
-#define I16MIN  (-I16MAX -1)
-#define I32MAX  (2147483647LL)
-#define I32MIN  (-I32MAX -1)
-#define I64MAX  (9223372036854775807LL)
-#define I64MIN  (-I64MAX - 1)
+#define I8_MAX   (127LL)
+#define I8_MIN   (-I8_MAX -1)
+#define I16_MAX  (32767LL)
+#define I16_MIN  (-I16_MAX -1)
+#define I32_MAX  (2147483647LL)
+#define I32_MIN  (-I32_MAX -1)
+#define I64_MAX  (9223372036854775807LL)
+#define I64_MIN  (-I64_MAX - 1)
 
 
 typedef unsigned char u8;
 typedef signed char   i8;
 
-#if USHRT_MAX == (U16MAX)
+#if USHRT_MAX == (U16_MAX)
     typedef unsigned short u16;
     typedef signed short   i16;
-#elif UINT_MAX == (U16MAX)
+#elif UINT_MAX == (U16_MAX)
     typedef unsigned int u16;
     typedef signed int   i16;
-#elif ULONG_MAX == (U16MAX)
+#elif ULONG_MAX == (U16_MAX)
     typedef unsigned long u16;
     typedef signed long   i16;
-#elif ULLONG_MAX == (U16MAX)
+#elif ULLONG_MAX == (U16_MAX)
     typedef unsigned long long u16;
     typedef signed long long   i16;
 #else
     #error "No 16-bit integer type available."
 #endif
 
-#if USHRT_MAX == (U32MAX)
+#if USHRT_MAX == (U32_MAX)
     typedef unsigned short u32;
     typedef signed short   i32;
-#elif UINT_MAX == (U32MAX)
+#elif UINT_MAX == (U32_MAX)
     typedef unsigned int u32;
     typedef signed int   i32;
-#elif ULONG_MAX == (U32MAX)
+#elif ULONG_MAX == (U32_MAX)
     typedef unsigned long u32;
     typedef signed long   i32;
-#elif ULLONG_MAX == (U32MAX)
+#elif ULLONG_MAX == (U32_MAX)
     typedef unsigned long long u32;
     typedef signed long long   i32;
 #else
     #error "No 32-bit integer type available."
 #endif
 
-#if USHRT_MAX == (U64MAX)
+#if USHRT_MAX == (U64_MAX)
     typedef unsigned short u64;
     typedef signed short   i64;
-#elif UINT_MAX == (U64MAX)
+#elif UINT_MAX == (U64_MAX)
     typedef unsigned int u64;
     typedef signed int   i64;
-#elif ULONG_MAX == (U64MAX)
+#elif ULONG_MAX == (U64_MAX)
     typedef unsigned long u64;
     typedef signed long   i64;
-#elif ULLONG_MAX == (U64MAX)
+#elif ULLONG_MAX == (U64_MAX)
     typedef unsigned long long u64;
     typedef signed long long   i64;
 #else
@@ -87,39 +87,36 @@ STATIC_ASSERT(sizeof (u64) == 8, "invalid size of u64");
 STATIC_ASSERT(sizeof (i64) == 8, "invalid size of i64");
 
 
-typedef uintptr_t uptr;
-typedef intptr_t  iptr;
-
 #ifdef CCC_ENABLE_SIZE128
-    #define U128MAX (340282366920938463463374607431768211455ULL)
+    #define U128_MAX (340282366920938463463374607431768211455ULL)
 #endif
 
-#if SIZE_MAX == U16MAX
-    #define USIZE_MAX U16MAX
-    #define USIZE_MIN U16MIN
-    #define ISIZE_MAX I16MAX
-    #define ISIZE_MIN I16MIN
+#if SIZE_MAX == U16_MAX
+    #define USIZE_MAX U16_MAX
+    #define USIZE_MIN U16_MIN
+    #define ISIZE_MAX I16_MAX
+    #define ISIZE_MIN I16_MIN
     typedef u16 usize;
     typedef i16 isize;
-#elif SIZE_MAX > U16MAX && SIZE_MAX == U32MAX
-    #define USIZE_MAX U32MAX
-    #define USIZE_MIN U32MIN
-    #define ISIZE_MAX I32MAX
-    #define ISIZE_MIN I32MIN
+#elif SIZE_MAX > U16_MAX && SIZE_MAX == U32_MAX
+    #define USIZE_MAX U32_MAX
+    #define USIZE_MIN U32_MIN
+    #define ISIZE_MAX I32_MAX
+    #define ISIZE_MIN I32_MIN
     typedef u32 usize;
     typedef i32 isize;
-#elif SIZE_MAX > U32MAX && SIZE_MAX == U64MAX
-    #define USIZE_MAX U64MAX
-    #define USIZE_MIN U64MIN
-    #define ISIZE_MAX I64MAX
-    #define ISIZE_MIN I64MIN
+#elif SIZE_MAX > U32_MAX && SIZE_MAX == U64_MAX
+    #define USIZE_MAX U64_MAX
+    #define USIZE_MIN U64_MIN
+    #define ISIZE_MAX I64_MAX
+    #define ISIZE_MIN I64_MIN
     typedef u64 usize;
     typedef i64 isize;
-#elif defined(CCC_ENABLE_SIZE128) && SIZE_MAX > U64MAX && SIZE_MAX == U128MAX
-    #define USIZE_MAX U128MAX
-    #define USIZE_MIN U128MIN
-    #define ISIZE_MAX I128MAX
-    #define ISIZE_MIN I128MIN
+#elif defined(CCC_ENABLE_SIZE128) && SIZE_MAX > U64_MAX && SIZE_MAX == U128_MAX
+    #define USIZE_MAX U128_MAX
+    #define USIZE_MIN U128_MIN
+    #define ISIZE_MAX I128_MAX
+    #define ISIZE_MIN I128_MIN
     typedef uint128_t usize;
     typedef int128_t  isize;
 #else
@@ -127,8 +124,15 @@ typedef intptr_t  iptr;
 #endif
 
 #ifdef CCC_ENABLE_SIZE128
-    #undef U128MAX
+    #undef U128_MAX
 #endif
+
+typedef uintptr_t uptr;
+typedef intptr_t  iptr;
+
+
+typedef float  f32;
+typedef double f64;
 
 
 #if __STDC_VERSION__ < 202000L
@@ -140,11 +144,11 @@ typedef intptr_t  iptr;
     #endif
 
     typedef _Bool bool;
-    #define true  1
-    #define false 0
+    #define true  ((bool)1)
+    #define false ((bool)0)
 #endif
 
 
 /// Empty (placeholder) type.
 typedef struct { u8 _; } __unit;
-#define unit { ._ = 0 }
+#define unit ((__unit){ ._ = 0 })
