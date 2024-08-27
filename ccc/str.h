@@ -16,8 +16,8 @@ typedef struct {
 } str;
 
 
-DEF_ARRAY(str, str)
-DEF_OPTION(str)
+CCC_DEF_ARRAY(str, str)
+CCC_DEF_OPTION(str)
 
 
 /// Mutable bounded string reference.
@@ -27,8 +27,8 @@ typedef struct {
 } str_mut;
 
 
-DEF_ARRAY(str_mut, str_mut)
-DEF_OPTION(str_mut)
+CCC_DEF_ARRAY(str_mut, str_mut)
+CCC_DEF_OPTION(str_mut)
 
 
 /// Helper for printing `str` and `str_mut`.

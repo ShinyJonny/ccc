@@ -21,7 +21,7 @@ typedef struct {
 } FmtError;
 
 
-DEF_RESULT(FmtResult, __unit, FmtError);
+CCC_DEF_RESULT(FmtResult, __unit, FmtError);
 
 
 // TODO: update the documentation.
@@ -46,8 +46,8 @@ typedef struct {
 /// compiled away, resulting in a statically dispatched, zero-cost abstraction.
 /// Also note that some compilers (GCC) will require `INLINE_ALWAYS` on all the
 /// method implementations for the optimisation to work.
-DEF_DYN_REF(Formatter);
-DEF_DYN_REF_MUT(Formatter);
+CCC_DEF_DYN_REF(Formatter);
+CCC_DEF_DYN_REF_MUT(Formatter);
 
 
 /// Writes a str into a formatter.

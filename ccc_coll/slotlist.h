@@ -10,7 +10,7 @@
 
 typedef struct { usize idx; } SlotListId;
 
-DEF_OPTION(SlotListId)
+CCC_DEF_OPTION(SlotListId)
 
 #define SL_ID_INVALID      ((SlotListId){ .idx = USIZE_MAX })
 #define sl_id_is_valid(id) ((id).idx != SL_ID_INVALID.idx)
@@ -21,7 +21,7 @@ typedef enum {
 } SlotListError;
 
 
-DEF_RESULT(SlotListIdResult, SlotListId, SlotListError);
+CCC_DEF_RESULT(SlotListIdResult, SlotListId, SlotListError);
 
 
 typedef struct {
@@ -29,7 +29,7 @@ typedef struct {
     SlotListId next;
 } SlotListLinks;
 
-DEF_ARRAY(SlotListLinks, slot_list_links)
+CCC_DEF_ARRAY(SlotListLinks, slot_list_links)
 
 
 typedef struct {

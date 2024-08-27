@@ -65,6 +65,7 @@ ref_mut
 str
 str_mut
 PSTR
+STRF
 cstr
 SOME
 NONE

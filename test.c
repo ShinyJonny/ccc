@@ -13,7 +13,7 @@
 #include "buffmt.h"
 
 
-DEF_RESULT(MainResult, __unit, FmtError);
+CCC_DEF_RESULT(MainResult, __unit, FmtError);
 
 
 MainResult run(SlotList ref const list)
@@ -58,7 +58,7 @@ typedef struct {
     str text;
 } Node;
 
-DEF_ARRAY(Node, node)
+CCC_DEF_ARRAY(Node, node)
 
 
 int main(void)

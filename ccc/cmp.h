@@ -4,7 +4,7 @@
 #include "primitive.h"
 
 
-#define def_numeric_eq_min_max(type)        \
+#define def_numeric_eq_min_max(type) \
 INLINE_ALWAYS                               \
 bool type##_eq(type const a, type const b)  \
 {                                           \

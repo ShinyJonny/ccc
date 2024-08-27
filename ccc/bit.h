@@ -5,7 +5,7 @@
 
 
 /// Creates a bit field with the length enough to hold `count` bits.
-#define bit_field(count, ...)                            \
+#define bit_field(count, ...) \
 ((BitField){                                             \
     .bytes = array(u8, ((count) + 7) >> 3, __VA_ARGS__), \
 })
