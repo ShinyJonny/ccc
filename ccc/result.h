@@ -10,7 +10,7 @@ typedef struct NODISCARD { \
         T ok;              \
         E err;             \
     };                     \
-} name
+} name;
 
 
 #ifdef CCC_ENABLE_GNU_FEATURES

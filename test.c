@@ -13,7 +13,7 @@
 #include "buffmt.h"
 
 
-CCC_DEF_RESULT(MainResult, __unit, FmtError);
+CCC_DEF_RESULT(MainResult, __unit, FmtError)
 
 
 MainResult run(SlotList ref const list)

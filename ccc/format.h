@@ -21,7 +21,7 @@ typedef struct {
 } FmtError;
 
 
-CCC_DEF_RESULT(FmtResult, __unit, FmtError);
+CCC_DEF_RESULT(FmtResult, __unit, FmtError)
 
 
 // TODO: update the documentation.

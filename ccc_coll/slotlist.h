@@ -21,7 +21,7 @@ typedef enum {
 } SlotListError;
 
 
-CCC_DEF_RESULT(SlotListIdResult, SlotListId, SlotListError);
+CCC_DEF_RESULT(SlotListIdResult, SlotListId, SlotListError)
 
 
 typedef struct {
