@@ -1,7 +1,7 @@
 #pragma once
 
-#include "primitive.h"
 #include "meta.h"
+#include "primitive.h"
 
 
 #ifdef CCC_USE_LIBC_INTRINSICS

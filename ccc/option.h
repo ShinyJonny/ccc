@@ -1,7 +1,7 @@
 #pragma once
 
-#include "primitive.h"
 #include "meta.h"
+#include "primitive.h"
 
 
 #define CCC_DEF_OPTION_NAMED(type, name) \
@@ -31,6 +31,9 @@ CCC_DEF_OPTION(f64)
 
 CCC_DEF_OPTION(bool)
 CCC_DEF_OPTION_NAMED(__unit, Option_)
+
+CCC_DEF_OPTION(str)
+CCC_DEF_OPTION(str_mut)
 
 
 /// Wraps the supplied *some* value in an option.

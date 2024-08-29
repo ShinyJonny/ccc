@@ -1,34 +1,15 @@
 #pragma once
 
-#include "primitive.h"
-#include "ref.h"
 #include "meta.h"
+#include "primitive.h"
+#include "intrinsics.h"
 #include "array.h"
 #include "option.h"
-#include "intrinsics.h"
 #include "cmp.h"
 
 
-/// Bounded string reference.
-typedef struct {
-    char ref dat;
-    usize len;
-} str;
-
-
 CCC_DEF_ARRAY(str, str)
-CCC_DEF_OPTION(str)
-
-
-/// Mutable bounded string reference.
-typedef struct {
-    char ref_mut dat;
-    usize len;
-} str_mut;
-
-
 CCC_DEF_ARRAY(str_mut, str_mut)
-CCC_DEF_OPTION(str_mut)
 
 
 /// Helper for printing `str` and `str_mut`.
@@ -49,19 +30,6 @@ CCC_DEF_OPTION(str_mut)
 /// printf("This is a `str`: \"" STRF "\".\n", PSTR(s));
 /// ```
 #define STRF "%.*s"
-
-
-/// Converts a C string to `str`.
-///
-/// C string literals can be easily converted using this helper.
-INLINE_ALWAYS
-str cstr(char ref const c_str)
-{
-    return (str){
-        .dat = c_str,
-        .len = ccc_c_str_len(c_str),
-    };
-}
 
 
 /// Downcasts `str_mut` to `str`.
@@ -290,7 +258,6 @@ str_mut str_slice_incl_mut(
 
 
 #ifdef CCC_IMPLEMENTATION
-str cstr(char ref c_str);
 str str_from_mut(str_mut s);
 Slice_u8 str_as_bytes(str s);
 SliceMut_u8 str_as_bytes_mut(str_mut s);

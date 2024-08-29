@@ -1,15 +1,6 @@
 #pragma once
 
-#include "ccc/primitive.h"
-
-
-#ifdef CCC_RESTRICT_REFERENCES
-    #define ref const* restrict
-    #define ref_mut * restrict
-#else
-    #define ref const*
-    #define ref_mut *
-#endif
+#include "primitive.h"
 
 typedef struct {
     usize const size;

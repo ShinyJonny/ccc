@@ -1,7 +1,8 @@
 #pragma once
 
-#include "array.h"
+#include "meta.h"
 #include "primitive.h"
+#include "array.h"
 
 
 /// Creates a bit field with the length enough to hold `count` bits.

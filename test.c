@@ -2,6 +2,8 @@
 #define CCC_COLL_IMPLEMENTATION
 
 #include <ccc/primitive.h>
+#include <ccc/assertions.h>
+#include <ccc/io.h>
 #include <ccc/str.h>
 #include <ccc/format.h>
 #include <ccc/result.h>

@@ -152,3 +152,26 @@ typedef double f64;
 /// Empty (placeholder) type.
 typedef struct { u8 _; } __unit;
 #define unit ((__unit){ ._ = 0 })
+
+
+#ifdef CCC_RESTRICT_REFERENCES
+    #define ref const* restrict
+    #define ref_mut * restrict
+#else
+    #define ref const*
+    #define ref_mut *
+#endif
+
+
+/// Bounded string reference.
+typedef struct {
+    char ref dat;
+    usize len;
+} str;
+
+
+/// Mutable bounded string reference.
+typedef struct {
+    char ref_mut dat;
+    usize len;
+} str_mut;

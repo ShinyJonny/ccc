@@ -1,6 +1,8 @@
 #pragma once
 
 #include "meta.h"
+#include "util.h"
+#include "assertions.h"
 #include "str.h"
 #include "result.h"
 #include "ref.h"
@@ -197,6 +199,24 @@ FmtResult __unit_fmt_dbg(DynRefMut_Formatter const f, __unit const _)
     return fmt_write_str(f, cstr("()"));
 }
 
+// ** assertion
+
+INLINE_ALWAYS
+FmtResult panic_info_fmt(DynRefMut_Formatter const f, PanicInfo ref const self)
+{
+    FmtResult res;
+    if ((res = fmt_write_str(f, self->reason)).is_err)    { return res; }
+    if (self->context.is_some) {
+        if ((res = fmt_write_str(f, cstr(": "))   ).is_err)     { return res; }
+        if ((res = fmt_write_str(f, self->context.val)).is_err) { return res; }
+    }
+    if (self->msg.is_some) {
+        if ((res = fmt_write_str(f, cstr(": "))   ).is_err) { return res; }
+        if ((res = fmt_write_str(f, self->msg.val)).is_err) { return res; }
+    }
+
+    return (FmtResult) OK(unit);
+}
 
 // ** str TODO
 
