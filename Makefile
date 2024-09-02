@@ -39,4 +39,4 @@ clean:
 
 .PHONY:
 lsp: clean
-	bear -- make -C . all
+	bear --config bear.conf -- make -C . all

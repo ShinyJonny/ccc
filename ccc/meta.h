@@ -20,7 +20,7 @@
 // Reserved keywords.
 
 #define unsafe    _Pragma("ccc unsafe")
-#define life(...) _Pragma(CCC_STRINGIFY(ccc lifetime(__VA_ARGS__)))
+#define life(...) _Pragma(_CCC_STRINGIFY(ccc lifetime(__VA_ARGS__)))
 #define COPY      _Pragma("ccc set_trait(COPY)")
 
 // Compiler integration.
