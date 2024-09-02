@@ -12,39 +12,6 @@ CCC_DEF_ARRAY(str, str)
 CCC_DEF_ARRAY(str_mut, str_mut)
 
 
-/// Helper for printing `str` and `str_mut`.
-///
-/// # Example
-///
-/// ```
-/// str const s = make_str();
-/// printf(STRF, PSTR(s));
-/// ```
-#define PSTR(s) (int)(s).len, (s).dat
-/// Format literal for printing `str` and `str_mut`.
-///
-/// # Example
-///
-/// ```
-/// str const s = make_str();
-/// printf("This is a `str`: \"" STRF "\".\n", PSTR(s));
-/// ```
-#define STRF "%.*s"
-
-
-/// Downcasts `str_mut` to `str`.
-///
-/// NOTE: this cannot be done the other way around.
-INLINE_ALWAYS
-str str_from_mut(str_mut const s)
-{
-    return (str){
-        .dat = s.dat,
-        .len = s.len,
-    };
-}
-
-
 /// Gets the underlying bytes of `s`, safely cast to `u8`.
 INLINE_ALWAYS
 Slice_u8 str_as_bytes(str const self)
@@ -258,7 +225,6 @@ str_mut str_slice_incl_mut(
 
 
 #ifdef CCC_IMPLEMENTATION
-str str_from_mut(str_mut s);
 Slice_u8 str_as_bytes(str s);
 SliceMut_u8 str_as_bytes_mut(str_mut s);
 str str_from_bytes(Slice_u8 bytes);

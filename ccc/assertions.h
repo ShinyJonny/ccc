@@ -15,19 +15,19 @@ NORETURN extern
 void ccc_panic_handler(PanicInfo ref msg);
 
 #define PANIC() ccc_panic_handler(&(PanicInfo) { \
-    .reason = cstr("explicit panic!"),                                         \
+    .reason = CCC_STR("explicit panic!"),                                      \
 })
 
 #define PANIC_MSG(message) ccc_panic_handler(&(PanicInfo) { \
-    .reason = cstr("explicit panic"),                                          \
-    .msg    = SOME(cstr(message)),                                             \
+    .reason = CCC_STR("explicit panic"),                                       \
+    .msg    = SOME(CCC_STR(message)),                                          \
 })
 
 #define ASSERT(expression) { \
     if (!(expression)) {                                                       \
         ccc_panic_handler(&(PanicInfo) {                                       \
-            .reason  = cstr("assertion failed"),                               \
-            .context = SOME(cstr("`" _CCC_STRINGIFY(expression) "`")),         \
+            .reason  = CCC_STR("assertion failed"),                            \
+            .context = SOME(CCC_STR("`" _CCC_STRINGIFY(expression) "`")),      \
         });                                                                    \
     }                                                                          \
 }
@@ -35,9 +35,9 @@ void ccc_panic_handler(PanicInfo ref msg);
 #define ASSERT_MSG(expression, message) { \
     if (!(expression)) {                                                       \
         ccc_panic_handler(&(PanicInfo) {                                       \
-            .reason  = cstr("assertion failed"),                               \
-            .context = SOME(cstr("`" _CCC_STRINGIFY(expression) "`")),         \
-            .msg     = SOME(cstr(message)),                                    \
+            .reason  = CCC_STR("assertion failed"),                            \
+            .context = SOME(CCC_STR("`" _CCC_STRINGIFY(expression) "`")),      \
+            .msg     = SOME(CCC_STR(message)),                                 \
         });                                                                    \
     }                                                                          \
 }
@@ -45,8 +45,8 @@ void ccc_panic_handler(PanicInfo ref msg);
 #define ASSERT_EQ(lhs, rhs) { \
     if ((lhs) != (rhs)) {                                                      \
         ccc_panic_handler(&(PanicInfo) {                                       \
-            .reason  = cstr("equality assertionn failed"),                     \
-            .context = SOME(cstr(                                              \
+            .reason  = CCC_STR("equality assertionn failed"),                  \
+            .context = SOME(CCC_STR(                                           \
                 "`"                                                            \
                 _CCC_STRINGIFY(lhs)                                            \
                 "` != `"                                                       \
@@ -60,15 +60,15 @@ void ccc_panic_handler(PanicInfo ref msg);
 #define ASSERT_EQ_MSG(lhs, rhs, message) { \
     if ((lhs) != (rhs)) {                                                      \
         ccc_panic_handler(&(PanicInfo) {                                       \
-            .reason  = cstr("equality assertionn failed"),                     \
-            .context = SOME(cstr(                                              \
+            .reason  = CCC_STR("equality assertionn failed"),                  \
+            .context = SOME(CCC_STR(                                           \
                 "`"                                                            \
                 _CCC_STRINGIFY(lhs)                                            \
                 "` != `"                                                       \
                 _CCC_STRINGIFY(rhs)                                            \
                 "`"                                                            \
             )),                                                                \
-            .msg  = SOME(cstr(message)),                                       \
+            .msg  = SOME(CCC_STR(message)),                                    \
         });                                                                    \
     }                                                                          \
 }
@@ -76,8 +76,8 @@ void ccc_panic_handler(PanicInfo ref msg);
 #define ASSERT_NE(lhs, rhs) { \
     if ((lhs) == (rhs)) {                                                      \
         ccc_panic_handler(&(PanicInfo) {                                       \
-            .reason  = cstr("inequality assertionn failed"),                   \
-            .context = SOME(cstr(                                              \
+            .reason  = CCC_STR("inequality assertionn failed"),                \
+            .context = SOME(CCC_STR(                                           \
                 "`"                                                            \
                 _CCC_STRINGIFY(lhs)                                            \
                 "` == `"                                                       \
@@ -91,35 +91,35 @@ void ccc_panic_handler(PanicInfo ref msg);
 #define ASSERT_NE_MSG(lhs, rhs, message) { \
     if ((lhs) == (rhs)) {                                                      \
         ccc_panic_handler(&(PanicInfo) {                                       \
-            .reason  = cstr("inequality assertionn failed"),                   \
-            .context = SOME(cstr(                                              \
+            .reason  = CCC_STR("inequality assertionn failed"),                \
+            .context = SOME(CCC_STR(                                           \
                 "`"                                                            \
                 _CCC_STRINGIFY(lhs)                                            \
                 "` == `"                                                       \
                 _CCC_STRINGIFY(rhs)                                            \
                 "`"                                                            \
             )),                                                                \
-            .msg  = SOME(cstr(message)),                                       \
+            .msg  = SOME(CCC_STR(message)),                                    \
         });                                                                    \
     }                                                                          \
 }
 
 #define TODO() ccc_panic_handler(&(PanicInfo) { \
-    .reason = cstr("todo!"),                                                   \
+    .reason = CCC_STR("todo!"),                                                \
 })
 
 #define TODO_MSG(message) ccc_panic_handler(&(PanicInfo) { \
-    .reason = cstr("todo"),                                                    \
-    .msg    = SOME(cstr(message)),                                             \
+    .reason = CCC_STR("todo"),                                                 \
+    .msg    = SOME(CCC_STR(message)),                                          \
 })
 
 #define UNREACHABLE() ccc_panic_handler(&(PanicInfo) { \
-    .reason = cstr("unreachable!"),                                            \
+    .reason = CCC_STR("unreachable!"),                                         \
 })
 
 #define UNREACHABLE_MSG(message) ccc_panic_handler(&(PanicInfo) { \
-    .reason = cstr("unreachable"),                                             \
-    .msg    = SOME(cstr(message)),                                             \
+    .reason = CCC_STR("unreachable"),                                          \
+    .msg    = SOME(CCC_STR(message)),                                          \
 })
 
 #ifdef CCC_DEBUG_ASSERTIONS

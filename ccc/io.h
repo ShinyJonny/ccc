@@ -232,9 +232,9 @@ void ccc_panic_handler(PanicInfo ref const info)
     StdioSinkGuard std_err = stdio_sink_lock(io_stderr());
 
     DynRefMut_Formatter f = stdio_sink_guard_as_dyn_mut_formatter(&std_err);
-    (void) fmt_write_str(f, cstr("PANIC: "));
+    (void) fmt_write_str(f, CCC_STR("PANIC: "));
     (void) panic_info_fmt(f, info);
-    (void) str_fmt(f, cstr("\n"));
+    (void) str_fmt(f, CCC_STR("\n"));
     (void) stdio_sink_guard_flush(&std_err);
 
     stdio_sink_guard_release(std_err);

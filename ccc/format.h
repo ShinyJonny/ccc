@@ -185,10 +185,10 @@ INLINE_ALWAYS
 FmtResult bool_fmt(DynRefMut_Formatter const f, bool const b)
 {
     if (b) {
-        return fmt_write_str(f, cstr("true"));
+        return fmt_write_str(f, CCC_STR("true"));
     }
 
-    return fmt_write_str(f, cstr("false"));
+    return fmt_write_str(f, CCC_STR("false"));
 }
 
 
@@ -196,7 +196,7 @@ INLINE_ALWAYS
 FmtResult __unit_fmt_dbg(DynRefMut_Formatter const f, __unit const _)
 {
     (void)_;
-    return fmt_write_str(f, cstr("()"));
+    return fmt_write_str(f, CCC_STR("()"));
 }
 
 // ** assertion
@@ -207,11 +207,11 @@ FmtResult panic_info_fmt(DynRefMut_Formatter const f, PanicInfo ref const self)
     FmtResult res;
     if ((res = fmt_write_str(f, self->reason)).is_err)    { return res; }
     if (self->context.is_some) {
-        if ((res = fmt_write_str(f, cstr(": "))   ).is_err)     { return res; }
+        if ((res = fmt_write_str(f, CCC_STR(": "))   ).is_err)     { return res; }
         if ((res = fmt_write_str(f, self->context.val)).is_err) { return res; }
     }
     if (self->msg.is_some) {
-        if ((res = fmt_write_str(f, cstr(": "))   ).is_err) { return res; }
+        if ((res = fmt_write_str(f, CCC_STR(": "))   ).is_err) { return res; }
         if ((res = fmt_write_str(f, self->msg.val)).is_err) { return res; }
     }
 
@@ -246,7 +246,7 @@ FmtResult str_split_fmt_dbg(DynRefMut_Formatter const f, StrSplit const split)
     FmtResult res;
     if ((res = fmt_write_char(f, '(')).is_err)       { return res; }
     if ((res = str_fmt_dbg(f, split._0)).is_err)     { return res; }
-    if ((res = fmt_write_str(f, cstr(", "))).is_err) { return res; }
+    if ((res = fmt_write_str(f, CCC_STR(", "))).is_err) { return res; }
     if ((res = str_fmt_dbg(f, split._1)).is_err)     { return res; }
     return fmt_write_char(f, ')');
 }
@@ -266,17 +266,18 @@ FmtResult fmt_error_fmt_dbg(
     {
         FmtResult res;
         if ((res = fmt_write_str(f,
-             cstr("FmtError::FmtFormatterError("))).is_err) { return res; }
+             CCC_STR("FmtError::FmtFormatterError("))).is_err) { return res; }
         if ((res = u32_fmt(f, e->fmt_error)).is_err) { return res; }
         return fmt_write_char(f, ')');
     }
     case FmtInvalidFormat:
-        return fmt_write_str(f, cstr("FmtError::FmtInvalidFormat"));
+        return fmt_write_str(f, CCC_STR("FmtError::FmtInvalidFormat"));
     case FmtUnknownPlaceholder:
     {
         FmtResult res;
         if ((res = fmt_write_str(f,
-             cstr("FmtError::FmtUnknownPlaceholder("))).is_err) { return res; }
+             CCC_STR("FmtError::FmtUnknownPlaceholder("))).is_err)
+            { return res; }
         if ((res = str_fmt_dbg(f, e->placeholder)).is_err) { return res; }
         return fmt_write_char(f, ')');
     }

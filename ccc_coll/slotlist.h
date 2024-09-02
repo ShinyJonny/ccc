@@ -325,7 +325,8 @@ FmtResult slot_list_fmt_dbg(
 
         SlotListId next = links.dat[list->head.idx].next;
         while (sl_id_is_valid(next)) {
-            if ((res = fmt_write_str(f, cstr(" -> "))).is_err) { return res; }
+            if ((res = fmt_write_str(f, CCC_STR(" -> "))).is_err)
+                { return res; }
             if ((res = usize_fmt(f, next.idx)).is_err)         { return res; }
 
             next = links.dat[next.idx].next;

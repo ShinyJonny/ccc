@@ -23,25 +23,25 @@ MainResult run(SlotList ref const list)
     BufFormatter buf_fmt = buf_fmt_create((Array_u8)array(u8, 1024, 0));
     DynRefMut_Formatter const fmt = buf_fmt_as_dyn_mut_formatter(&buf_fmt);
 
-    StrSplit const split = str_split_at(cstr("Harro, everynyan!"), 5);
+    StrSplit const split = str_split_at(cs("Harro, everynyan!"), 5);
     FmtResult result;
-    if ((result = str_fmt(fmt, cstr("StrSplit (\""))).is_err) {
+    if ((result = str_fmt(fmt, cs("StrSplit (\""))).is_err) {
         return (MainResult) ERR(result.err);
     }
     if ((result = str_fmt(fmt, split._0)).is_err) {
         return (MainResult) ERR(result.err);
     }
-    if ((result = str_fmt(fmt, cstr("\", \""))).is_err) {
+    if ((result = str_fmt(fmt, cs("\", \""))).is_err) {
         return (MainResult) ERR(result.err);
     }
     if ((result = str_fmt(fmt, split._1)).is_err) {
         return (MainResult) ERR(result.err);
     }
-    if ((result = str_fmt(fmt, cstr("\")"))).is_err) {
+    if ((result = str_fmt(fmt, cs("\")"))).is_err) {
         return (MainResult) ERR(result.err);
     }
 
-    if ((result = str_fmt(fmt, cstr("\n"))).is_err) {
+    if ((result = str_fmt(fmt, cs("\n"))).is_err) {
         return (MainResult) ERR(result.err);
     }
     if ((result = slot_list_fmt_dbg(fmt, list)).is_err) {
@@ -73,18 +73,18 @@ int main(void)
 
     SlotListIdResult const first = slot_list_append(&list);
     ASSERT(!first.is_err);
-    list_data.ptr[first.ok.idx] = (Node){ .magic = 3, .text = cstr("three") };
+    list_data.ptr[first.ok.idx] = (Node){ .magic = 3, .text = cs("three") };
     ASSERT(list.tail.idx == first.ok.idx);
     ASSERT(!slot_list_next(&list, first.ok).is_some);
     SlotListIdResult const second = slot_list_append(&list);
     ASSERT(!second.is_err);
-    list_data.ptr[second.ok.idx] = (Node){ .magic = 6, .text = cstr("six") };
+    list_data.ptr[second.ok.idx] = (Node){ .magic = 6, .text = cs("six") };
     ASSERT(slot_list_next(&list, first.ok).is_some);
     ASSERT(slot_list_next(&list, first.ok).val.idx == second.ok.idx);
     ASSERT(list.tail.idx == second.ok.idx);
     SlotListIdResult const third = slot_list_prepend(&list);
     ASSERT(!third.is_err);
-    list_data.ptr[third.ok.idx] = (Node){ .magic = 9, .text = cstr("nine") };
+    list_data.ptr[third.ok.idx] = (Node){ .magic = 9, .text = cs("nine") };
 
     MainResult const result = run(&list);
     if (result.is_err) {
@@ -92,7 +92,7 @@ int main(void)
         BufFormatter buf_fmt = buf_fmt_create(buffer);
         DynRefMut_Formatter const fmt = buf_fmt_as_dyn_mut_formatter(&buf_fmt);
 
-        (void) fmt_write_str(fmt, cstr("Error: "));
+        (void) fmt_write_str(fmt, cs("Error: "));
         (void) fmt_error_fmt_dbg(fmt, &result.err);
         str const err_msg = buf_fmt_get_str(&buf_fmt);
         fprintf(stderr, STRF "\n", PSTR(err_msg));
