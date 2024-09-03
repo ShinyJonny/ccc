@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "meta.h"
 #include "intrinsics.h"
 #include "assertions.h"
@@ -12,57 +13,70 @@
 /// a slice to the contents of the array. The contents of the array are
 /// initialised with the remaining arguments and the rest is zero-initialised.
 #define array(T, length, ...) \
-{                                      \
-    .ptr = (T[length]){ __VA_ARGS__ }, \
-    .len = length,                     \
-}
+{                                                                              \
+    .ptr = (T[length]){ __VA_ARGS__ },                                         \
+    .len = length,                                                             \
+}                                                                              \
 
 
-#define CCC_DEF_ARRAY_NAMED(type, typename, typename_slice, typename_slice_mut, array_prefix, slice_prefix) \
-typedef struct {                                                      \
-    type* ptr;                                                        \
-    usize len;                                                        \
-} typename;                                                           \
-                                                                      \
-typedef struct {                                                      \
-    type ref dat;                                                     \
-    usize len;                                                        \
-} typename_slice;                                                     \
-                                                                      \
-typedef struct {                                                      \
-    type ref_mut dat;                                                 \
-    usize len;                                                        \
-} typename_slice_mut;                                                 \
-                                                                      \
-INLINE_ALWAYS                                                         \
-typename_slice array_prefix##_as_ref(typename ref const self)         \
-{                                                                     \
-    return (typename_slice){                                          \
-        .dat = self->ptr,                                             \
-        .len = self->len,                                             \
-    };                                                                \
-}                                                                     \
-                                                                      \
-INLINE_ALWAYS                                                         \
-typename_slice_mut array_prefix##_as_mut(typename ref_mut const self) \
-{                                                                     \
-    return (typename_slice_mut){                                      \
-        .dat = self->ptr,                                             \
-        .len = self->len,                                             \
-    };                                                                \
-}                                                                     \
-                                                                      \
-INLINE_ALWAYS                                                         \
-typename_slice slice_prefix##_from_mut(typename_slice_mut const self) \
-{                                                                     \
-    return (typename_slice){                                          \
-        .dat = self.dat,                                              \
-        .len = self.len,                                              \
-    };                                                                \
-}
+#define CCC_DEF_ARRAY_NAMED(type, typename, typename_slice, \
+    typename_slice_mut, array_prefix, slice_prefix) \
+typedef struct {                                                               \
+    type* ptr;                                                                 \
+    usize len;                                                                 \
+} typename;                                                                    \
+                                                                               \
+typedef struct {                                                               \
+    type ref dat;                                                              \
+    usize len;                                                                 \
+} typename_slice;                                                              \
+                                                                               \
+typedef struct {                                                               \
+    type ref_mut dat;                                                          \
+    usize len;                                                                 \
+} typename_slice_mut;                                                          \
+                                                                               \
+INLINE_ALWAYS                                                                  \
+typename_slice array_prefix##_as_ref(typename ref const self)                  \
+{                                                                              \
+    return (typename_slice){                                                   \
+        .dat = self->ptr,                                                      \
+        .len = self->len,                                                      \
+    };                                                                         \
+}                                                                              \
+                                                                               \
+INLINE_ALWAYS                                                                  \
+typename_slice_mut array_prefix##_as_mut(typename ref_mut const self)          \
+{                                                                              \
+    return (typename_slice_mut){                                               \
+        .dat = self->ptr,                                                      \
+        .len = self->len,                                                      \
+    };                                                                         \
+}                                                                              \
+                                                                               \
+INLINE_ALWAYS                                                                  \
+typename_slice slice_prefix##_from_mut(typename_slice_mut const self)          \
+{                                                                              \
+    return (typename_slice){                                                   \
+        .dat = self.dat,                                                       \
+        .len = self.len,                                                       \
+    };                                                                         \
+}                                                                              \
 
 #define CCC_DEF_ARRAY(type, impl_name) \
-    CCC_DEF_ARRAY_NAMED(type, Array_##type, Slice_##type, SliceMut_##type, array_##impl_name, slice_##impl_name)
+    CCC_DEF_ARRAY_NAMED(type, Array_##type, Slice_##type, SliceMut_##type, \
+        array_##impl_name, slice_##impl_name)
+
+
+#define CCC_DECL_ARRAY_NAMED(type, typename, typename_slice, \
+    typename_slice_mut, array_prefix, slice_prefix) \
+typename_slice array_prefix##_as_ref(typename ref const self);                 \
+typename_slice_mut array_prefix##_as_mut(typename ref_mut const self);         \
+typename_slice slice_prefix##_from_mut(typename_slice_mut const self);         \
+
+#define CCC_DECL_ARRAY(type, impl_name) \
+    CCC_DECL_ARRAY_NAMED(type, Array_##type, Slice_##type, SliceMut_##type, \
+        array_##impl_name, slice_##impl_name)
 
 
 CCC_DEF_ARRAY(u8, u8)
@@ -91,7 +105,6 @@ typedef struct {
     Slice_u8 _1;
 } ByteSplit;
 
-
 INLINE_ALWAYS
 ByteSplit bytes_split_at(Slice_u8 const self, usize const idx)
 {
@@ -114,7 +127,6 @@ typedef struct {
     SliceMut_u8 _0;
     SliceMut_u8 _1;
 } ByteSplitMut;
-
 
 INLINE_ALWAYS
 ByteSplitMut bytes_split_at_mut(SliceMut_u8 const self, usize const idx)
@@ -248,3 +260,52 @@ SliceMut_u8 slice_u8_slice_incl_mut(
         .len = checked_end - start + 1,
     };
 }
+
+
+#ifdef CCC_IMPLEMENTATION
+CCC_DECL_ARRAY(u8, u8)
+CCC_DECL_ARRAY(i8, i8)
+CCC_DECL_ARRAY(u16, u16)
+CCC_DECL_ARRAY(i16, i16)
+CCC_DECL_ARRAY(u32, u32)
+CCC_DECL_ARRAY(i32, i32)
+CCC_DECL_ARRAY(u64, u64)
+CCC_DECL_ARRAY(i64, i64)
+
+CCC_DECL_ARRAY(usize, usize)
+CCC_DECL_ARRAY(isize, isize)
+CCC_DECL_ARRAY(uptr, uptr)
+CCC_DECL_ARRAY(iptr, iptr)
+
+CCC_DECL_ARRAY(f32, f32)
+CCC_DECL_ARRAY(f64, f64)
+
+CCC_DECL_ARRAY(bool, bool)
+CCC_DECL_ARRAY(__unit, __unit)
+
+ByteSplit bytes_split_at(Slice_u8 const self, usize const idx);
+ByteSplitMut bytes_split_at_mut(SliceMut_u8 const self, usize const idx);
+void slice_u8_fill(SliceMut_u8 const self, u8 const val);
+bool slice_u8_eq(Slice_u8 const a, Slice_u8 const b);
+Option_usize slice_u8_find_u8(Slice_u8 const self, u8 const b);
+Option_usize slice_u8_find(
+    Slice_u8 const self,
+    bool (* const predicate)(u8 val, usize index)
+);
+Slice_u8 slice_u8_slice(Slice_u8 const self, usize const start, usize const end);
+SliceMut_u8 slice_u8_slice_mut(
+    SliceMut_u8 const self,
+    usize const start,
+    usize const end
+);
+Slice_u8 slice_u8_slice_incl(
+    Slice_u8 const self,
+    usize const start,
+    usize const end
+);
+SliceMut_u8 slice_u8_slice_incl_mut(
+    SliceMut_u8 const self,
+    usize const start,
+    usize const end
+);
+#endif

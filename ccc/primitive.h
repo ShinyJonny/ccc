@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "meta.h"
 
 #include <limits.h> /// NOTE: used only for `*_MAX`.
@@ -126,6 +127,7 @@ STATIC_ASSERT(sizeof (i64) == 8, "invalid size of i64");
 #ifdef CCC_ENABLE_SIZE128
     #undef U128_MAX
 #endif
+
 
 typedef uintptr_t uptr;
 typedef intptr_t  iptr;

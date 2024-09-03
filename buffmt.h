@@ -11,8 +11,8 @@ typedef struct {
 
 
 typedef enum {
-    CapacityExceeded,
-} BufFormatterError;
+    BufFmtError_CapacityExceeded,
+} BufFmtError;
 
 
 INLINE_ALWAYS
@@ -29,8 +29,8 @@ FmtResult buf_fmt_write_str(void ref_mut const void_ctx, str const s)
 
     if (ctx->len + bytes.len > buf.len) {
         return (FmtResult) ERR((FmtError){
-            .kind      = FmtFormatterError,
-            .fmt_error = CapacityExceeded,
+            .kind      = FmtErrorKind_FormatterError,
+            .fmt_error = BufFmtError_CapacityExceeded,
         });
     }
 
@@ -50,8 +50,8 @@ FmtResult buf_fmt_write_char(void ref_mut const void_ctx, char const c)
 
     if (ctx->len >= buf.len) {
         return (FmtResult) ERR((FmtError){
-            .kind      = FmtFormatterError,
-            .fmt_error = CapacityExceeded,
+            .kind      = FmtErrorKind_FormatterError,
+            .fmt_error = BufFmtError_CapacityExceeded,
         });
     }
     buf.dat[ctx->len] = c;

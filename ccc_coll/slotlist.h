@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include <ccc/bit.h>
 #include <ccc/result.h>
 #include <ccc/intrinsics.h>
@@ -17,7 +18,7 @@ CCC_DEF_OPTION(SlotListId)
 
 
 typedef enum {
-    SlotListCapacityExceeded,
+    SlotListError_CapacityExceeded,
 } SlotListError;
 
 
@@ -98,7 +99,7 @@ Option_SlotListId slot_list_prev(SlotList ref const self, SlotListId const id)
 }
 
 inline
-Option_SlotListId _slot_list_allocate(SlotList ref_mut const self)
+Option_SlotListId _ccc_slot_list_allocate(SlotList ref_mut const self)
 {
     SlotListId new_id = SL_ID_INVALID;
     for (usize i = 0; i < self->links.len; i++) {
@@ -120,9 +121,9 @@ Option_SlotListId _slot_list_allocate(SlotList ref_mut const self)
 inline
 SlotListIdResult slot_list_append(SlotList ref_mut const self)
 {
-    Option_SlotListId const opt_new_id = _slot_list_allocate(self);
+    Option_SlotListId const opt_new_id = _ccc_slot_list_allocate(self);
     if (!opt_new_id.is_some) {
-        return (SlotListIdResult) ERR(SlotListCapacityExceeded);
+        return (SlotListIdResult) ERR(SlotListError_CapacityExceeded);
     }
 
     SlotListId const new_id = opt_new_id.val;
@@ -149,9 +150,9 @@ SlotListIdResult slot_list_append(SlotList ref_mut const self)
 inline
 SlotListIdResult slot_list_prepend(SlotList ref_mut const self)
 {
-    Option_SlotListId const opt_new_id = _slot_list_allocate(self);
+    Option_SlotListId const opt_new_id = _ccc_slot_list_allocate(self);
     if (!opt_new_id.is_some) {
-        return (SlotListIdResult) ERR(SlotListCapacityExceeded);
+        return (SlotListIdResult) ERR(SlotListError_CapacityExceeded);
     }
 
     SlotListId const new_id = opt_new_id.val;
@@ -190,9 +191,9 @@ SlotListIdResult slot_list_insert_after(
     SliceMut_SlotListLinks const links
         = array_slot_list_links_as_mut(&self->links);
 
-    Option_SlotListId const opt_new_id = _slot_list_allocate(self);
+    Option_SlotListId const opt_new_id = _ccc_slot_list_allocate(self);
     if (!opt_new_id.is_some) {
-        return (SlotListIdResult) ERR(SlotListCapacityExceeded);
+        return (SlotListIdResult) ERR(SlotListError_CapacityExceeded);
     }
 
     SlotListId const new_id = opt_new_id.val;
@@ -227,9 +228,9 @@ SlotListIdResult slot_list_insert_before(
     SliceMut_SlotListLinks const links
         = array_slot_list_links_as_mut(&self->links);
 
-    Option_SlotListId const opt_new_id = _slot_list_allocate(self);
+    Option_SlotListId const opt_new_id = _ccc_slot_list_allocate(self);
     if (!opt_new_id.is_some) {
-        return (SlotListIdResult) ERR(SlotListCapacityExceeded);
+        return (SlotListIdResult) ERR(SlotListError_CapacityExceeded);
     }
 
     SlotListId const new_id = opt_new_id.val;
@@ -336,16 +337,31 @@ FmtResult slot_list_fmt_dbg(
     return fmt_write_char(f, ']');
 }
 
-#undef SL_ID_INVALID
-#undef sl_id_is_valid
-
 
 #ifdef CCC_COLL_IMPLEMENTATION
-SlotList slot_list_create(BitField usage_map, Array_SlotListLinks links);
-Option_SlotListId slot_list_next(SlotList ref self, SlotListId id);
-Option_SlotListId slot_list_prev(SlotList ref self, SlotListId id);
-Option_SlotListId _slot_list_allocate(SlotList ref_mut self);
-SlotListIdResult slot_list_append(SlotList ref_mut self);
-SlotListIdResult slot_list_prepend(SlotList ref_mut self);
-FmtResult slot_list_fmt_dbg(DynRefMut_Formatter f, SlotList ref list);
+SlotList slot_list_create(BitField usage_map, Array_SlotListLinks const links);
+Option_SlotListId slot_list_next(SlotList ref const self, SlotListId const id);
+Option_SlotListId slot_list_prev(SlotList ref const self, SlotListId const id);
+Option_SlotListId _ccc_slot_list_allocate(SlotList ref_mut const self);
+SlotListIdResult slot_list_append(SlotList ref_mut const self);
+SlotListIdResult slot_list_prepend(SlotList ref_mut const self);
+SlotListIdResult slot_list_insert_after(
+    SlotList ref_mut const self,
+    SlotListId const prev_id
+);
+SlotListIdResult slot_list_insert_before(
+    SlotList ref_mut const self,
+    SlotListId const next_id
+);
+void slot_list_remove(SlotList ref_mut const self, SlotListId const id);
+Option_SlotListId slot_list_pop_head(SlotList ref_mut const self);
+Option_SlotListId slot_list_pop_tail(SlotList ref_mut const self);
+FmtResult slot_list_fmt_dbg(
+    DynRefMut_Formatter const f,
+    SlotList ref const list
+);
 #endif
+
+
+#undef SL_ID_INVALID
+#undef sl_id_is_valid

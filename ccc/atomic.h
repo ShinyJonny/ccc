@@ -1,12 +1,20 @@
 #pragma once
 
+
 #include "meta.h"
 #include "primitive.h"
 #include "assertions.h"
 #include "result.h"
 #include <stdatomic.h>
 
+
 #ifdef CCC_MODULE_ATOMICS
+
+
+#ifdef __STDC_NO_ATOMICS__
+    #error "atomics not supported (`__STDC_NO_ATOMICS__`)"
+#endif
+
 
 typedef enum {
     MemOrd_Relaxed = memory_order_relaxed,
@@ -16,6 +24,7 @@ typedef enum {
     MemOrd_AcqRel  = memory_order_acq_rel,
     MemOrd_SeqCst  = memory_order_seq_cst,
 } MemOrd;
+
 
 INLINE_ALWAYS
 memory_order _ccc_mem_ord_to_memory_order(MemOrd const self)
@@ -36,6 +45,8 @@ memory_order _ccc_mem_ord_to_memory_order(MemOrd const self)
     DEBUG_UNREACHABLE();
 }
 
+
+/// Tests whether `ord` is valid for a load operation.
 INLINE_ALWAYS
 bool mem_ord_is_valid_load(MemOrd const ord)
 {
@@ -48,6 +59,8 @@ bool mem_ord_is_valid_load(MemOrd const ord)
     }
 }
 
+
+/// Tests whether `ord` is valid for a store operation.
 INLINE_ALWAYS
 bool mem_ord_is_valid_store(MemOrd const ord)
 {
@@ -59,6 +72,7 @@ bool mem_ord_is_valid_store(MemOrd const ord)
         return true;
     }
 }
+
 
 #define _ccc_def_atomic(atomic_typename, type, typename, impl_prefix) \
 typedef struct {                                                               \
@@ -136,7 +150,24 @@ void impl_prefix##_store(                                                      \
         val,                                                                   \
         _ccc_mem_ord_to_memory_order(ordering)                                 \
     );                                                                         \
-}
+}                                                                              \
+
+
+#define _ccc_decl_atomic(atomic_typename, type, typename, impl_prefix) \
+CmpXchgResult_##typename impl_prefix##_compare_exchange_weak(                  \
+    atomic_typename ref const self,                                            \
+    type expected,                                                             \
+    type const new,                                                            \
+    MemOrd const success,                                                      \
+    MemOrd const failure                                                       \
+);                                                                             \
+type impl_prefix##_load(atomic_typename ref const self, MemOrd const ordering);\
+void impl_prefix##_store(                                                      \
+    atomic_typename ref const self,                                            \
+    type const val,                                                            \
+    MemOrd const ordering                                                      \
+);                                                                             \
+
 
 _ccc_def_atomic(AtomicBool, bool, bool, atomic_bool)
 
@@ -158,19 +189,30 @@ AtomicBool atomic_bool_create_default(void)
     return ATOMIC_BOOL_CREATE_DEFAULT();
 }
 
+
 _ccc_def_atomic(AtomicUsize, usize, usize, atomic_usize)
 
 #define ATOMIC_USIZE_CREATE(val) ((AtomicUsize){ .inner = (val) })
 #define ATOMIC_USIZE_CREATE_DEFAULT(val) ATOMIC_USIZE_CREATE(0u)
 
-_ccc_def_atomic(AtomicU32, u32, u32, atomic_u32)
-
-#define ATOMIC_U32_CREATE(val) ((AtomicU32){ .inner = (val) })
-#define ATOMIC_U32_CREATE_DEFAULT(val) ATOMIC_U32_CREATE(0u)
 
 #undef _ccc_def_atomic
 
+
 #ifdef CCC_IMPLEMENTATION
+memory_order _ccc_mem_ord_to_memory_order(MemOrd const self);
+bool mem_ord_is_valid_load(MemOrd const ord);
+bool mem_ord_is_valid_store(MemOrd const ord);
+
+_ccc_decl_atomic(AtomicBool, bool, bool, atomic_bool)
+_ccc_decl_atomic(AtomicUsize, usize, usize, atomic_usize)
+
+AtomicBool atomic_bool_create(bool const inner);
+AtomicBool atomic_bool_create_default(void);
 #endif
+
+
+#undef _ccc_decl_atomic
+
 
 #endif

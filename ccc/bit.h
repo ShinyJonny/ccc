@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "meta.h"
 #include "primitive.h"
 #include "array.h"
@@ -7,9 +8,9 @@
 
 /// Creates a bit field with the length enough to hold `count` bits.
 #define bit_field(count, ...) \
-((BitField){                                             \
-    .bytes = array(u8, ((count) + 7) >> 3, __VA_ARGS__), \
-})
+((BitField){                                                                   \
+    .bytes = array(u8, ((count) + 7) >> 3, __VA_ARGS__),                       \
+})                                                                             \
 
 
 typedef struct {
@@ -125,14 +126,26 @@ void bit_field_set_all(BitField ref_mut const self)
 
 
 #ifdef CCC_IMPLEMENTATION
-bool bit_field_can_index(BitField ref self, usize bit);
-bool bit_field_has_capacity_for(BitField ref self, usize bits);
-bool bit_field_get_composite(BitField ref self, usize byte, usize bit);
-bool bit_field_get(BitField ref self, usize pos);
-void bit_field_set_composite(BitField ref_mut self, usize byte, usize bit);
-void bit_field_set(BitField ref_mut self, usize pos);
-void bit_field_clear_composite(BitField ref_mut self, usize byte, usize bit);
-void bit_field_clear(BitField ref_mut self, usize pos);
-void bit_field_clear_all(BitField ref_mut self);
-void bit_field_set_all(BitField ref_mut self);
+bool bit_field_can_index(BitField ref const self, usize const bit);
+bool bit_field_has_capacity_for(BitField ref const self, usize const bits);
+bool bit_field_get_composite(
+    BitField ref const self,
+    usize const byte,
+    usize const bit
+);
+bool bit_field_get(BitField ref const self, usize const pos);
+void bit_field_set_composite(
+    BitField ref_mut const self,
+    usize const byte,
+    usize const bit
+);
+void bit_field_set(BitField ref_mut const self, usize const pos);
+void bit_field_clear_composite(
+    BitField ref_mut const self,
+    usize const byte,
+    usize const bit
+);
+void bit_field_clear(BitField ref_mut const self, usize const pos);
+void bit_field_clear_all(BitField ref_mut const self);
+void bit_field_set_all(BitField ref_mut const self);
 #endif

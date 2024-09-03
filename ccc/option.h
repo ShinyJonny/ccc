@@ -1,13 +1,14 @@
 #pragma once
 
+
 #include "meta.h"
 #include "primitive.h"
 
 
 #define CCC_DEF_OPTION_NAMED(type, name) \
-typedef struct NODISCARD { \
-    bool is_some;          \
-    type val;              \
+typedef struct NODISCARD {                                                     \
+    bool is_some;                                                              \
+    type val;                                                                  \
 } name;
 #define CCC_DEF_OPTION(type) CCC_DEF_OPTION_NAMED(type, Option_##type)
 
@@ -38,9 +39,9 @@ CCC_DEF_OPTION(str_mut)
 
 /// Wraps the supplied *some* value in an option.
 #define SOME(...) { \
-    .is_some = true,      \
-    .val = (__VA_ARGS__), \
-}
+    .is_some = true,                                                           \
+    .val = (__VA_ARGS__),                                                      \
+}                                                                              \
 
 
 /// Returns the *none* variant of an option.
@@ -50,19 +51,20 @@ CCC_DEF_OPTION(str_mut)
 #ifdef CCC_ENABLE_GNU_FEATURES
     /// Unwraps the `some` value or propagates the `none` variant.
     #define try_opt(expr, RET_T) ({ \
-        __auto_type in_var = (expr); \
-        if (!in_var.is_some) {       \
-            return (RET_T) NONE;     \
-        }                            \
-        in_var.val;                  \
-    })
+        __auto_type in_var = (expr);                                           \
+        if (!in_var.is_some) {                                                 \
+            return (RET_T) NONE;                                               \
+        }                                                                      \
+        in_var.val;                                                            \
+    })                                                                         \
 
     /// Unwraps the `some` value or returns `ret`.
     #define unwrap_opt_or_ret(expr, ret) ({ \
-        __auto_type in_var = (expr); \
-        if (!in_var.is_some) {       \
-            return (ret);            \
-        }                            \
-        in_var.val;                  \
-    })
+        __auto_type in_var = (expr);                                           \
+        if (!in_var.is_some) {                                                 \
+            return (ret);                                                      \
+        }                                                                      \
+        in_var.val;                                                            \
+    })                                                                         \
+
 #endif

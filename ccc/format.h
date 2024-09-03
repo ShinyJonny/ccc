@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "meta.h"
 #include "util.h"
 #include "assertions.h"
@@ -9,10 +10,11 @@
 
 
 typedef enum {
-    FmtFormatterError,
-    FmtInvalidFormat,
-    FmtUnknownPlaceholder,
+    FmtErrorKind_FormatterError,
+    FmtErrorKind_InvalidFormat,
+    FmtErrorKind_UnknownPlaceholder,
 } FmtErrorKind;
+
 
 typedef struct {
     FmtErrorKind kind;
@@ -66,13 +68,6 @@ FmtResult fmt_write_char(DynRefMut_Formatter const f, char const c)
 {
     return f.vtable->write_char(f.dst, c);
 }
-
-// NOTE: this will never be inline due to the use of va args.
-FmtResult fmt_write_fmt(
-    DynRefMut_Formatter const f,
-    char ref const format,
-    ...
-);
 
 
 // Formatting implementations for types.
@@ -199,7 +194,9 @@ FmtResult __unit_fmt_dbg(DynRefMut_Formatter const f, __unit const _)
     return fmt_write_str(f, CCC_STR("()"));
 }
 
+
 // ** assertion
+
 
 INLINE_ALWAYS
 FmtResult panic_info_fmt(DynRefMut_Formatter const f, PanicInfo ref const self)
@@ -217,6 +214,7 @@ FmtResult panic_info_fmt(DynRefMut_Formatter const f, PanicInfo ref const self)
 
     return (FmtResult) OK(unit);
 }
+
 
 // ** str TODO
 
@@ -262,7 +260,7 @@ FmtResult fmt_error_fmt_dbg(
 )
 {
     switch (e->kind) {
-    case FmtFormatterError:
+    case FmtErrorKind_FormatterError:
     {
         FmtResult res;
         if ((res = fmt_write_str(f,
@@ -270,9 +268,9 @@ FmtResult fmt_error_fmt_dbg(
         if ((res = u32_fmt(f, e->fmt_error)).is_err) { return res; }
         return fmt_write_char(f, ')');
     }
-    case FmtInvalidFormat:
+    case FmtErrorKind_InvalidFormat:
         return fmt_write_str(f, CCC_STR("FmtError::FmtInvalidFormat"));
-    case FmtUnknownPlaceholder:
+    case FmtErrorKind_UnknownPlaceholder:
     {
         FmtResult res;
         if ((res = fmt_write_str(f,
@@ -288,22 +286,26 @@ FmtResult fmt_error_fmt_dbg(
 
 
 #ifdef CCC_IMPLEMENTATION
-FmtResult fmt_write_str(DynRefMut_Formatter f, str s);
-FmtResult fmt_write_char(DynRefMut_Formatter f, char c);
-FmtResult u64_fmt(DynRefMut_Formatter f, u64 num);
-FmtResult u32_fmt(DynRefMut_Formatter f, u32 num);
-FmtResult u16_fmt(DynRefMut_Formatter f, u16 num);
-FmtResult u8_fmt(DynRefMut_Formatter f, u8 num);
-FmtResult i64_fmt(DynRefMut_Formatter f, i64 num);
-FmtResult i32_fmt(DynRefMut_Formatter f, i32 num);
-FmtResult i16_fmt(DynRefMut_Formatter f, i16 num);
-FmtResult i8_fmt(DynRefMut_Formatter f, i8 num);
-FmtResult usize_fmt(DynRefMut_Formatter f, usize num);
-FmtResult isize_fmt(DynRefMut_Formatter f, isize num);
-FmtResult bool_fmt(DynRefMut_Formatter f, bool b);
-FmtResult __unit_fmt_dbg(DynRefMut_Formatter f, __unit _);
-FmtResult str_fmt(DynRefMut_Formatter f, str s);
-FmtResult str_fmt_dbg(DynRefMut_Formatter f, str s);
-FmtResult str_split_fmt_dbg(DynRefMut_Formatter f, StrSplit split);
-FmtResult fmt_error_fmt_dbg(DynRefMut_Formatter f, FmtError ref e);
+FmtResult fmt_write_str(DynRefMut_Formatter const f, str const s);
+FmtResult fmt_write_char(DynRefMut_Formatter const f, char const c);
+FmtResult u64_fmt(DynRefMut_Formatter const f, u64 num);
+FmtResult u32_fmt(DynRefMut_Formatter const f, u32 const num);
+FmtResult u16_fmt(DynRefMut_Formatter const f, u16 const num);
+FmtResult u8_fmt(DynRefMut_Formatter const f, u8 const num);
+FmtResult i64_fmt(DynRefMut_Formatter const f, i64 num);
+FmtResult i32_fmt(DynRefMut_Formatter const f, i32 const num);
+FmtResult i16_fmt(DynRefMut_Formatter const f, i16 const num);
+FmtResult i8_fmt(DynRefMut_Formatter const f, i8 const num);
+FmtResult usize_fmt(DynRefMut_Formatter const f, usize const num);
+FmtResult isize_fmt(DynRefMut_Formatter const f, isize const num);
+FmtResult bool_fmt(DynRefMut_Formatter const f, bool const b);
+FmtResult __unit_fmt_dbg(DynRefMut_Formatter const f, __unit const _);
+FmtResult panic_info_fmt(DynRefMut_Formatter const f, PanicInfo ref const self);
+FmtResult str_fmt(DynRefMut_Formatter const f, str const s);
+FmtResult str_fmt_dbg(DynRefMut_Formatter const f, str const s);
+FmtResult str_split_fmt_dbg(DynRefMut_Formatter const f, StrSplit const split);
+FmtResult fmt_error_fmt_dbg(
+    DynRefMut_Formatter const f,
+    FmtError ref const e
+);
 #endif

@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "meta.h"
 #include "primitive.h"
 #include "intrinsics.h"
@@ -8,7 +9,7 @@
 #define _CCC_STR_FROM_CSTRING_LITERAL(s) ((str) { \
     .dat = s,                                                                  \
     .len = sizeof s,                                                           \
-})
+})                                                                             \
 
 
 /// Helper for printing `str` and `str_mut`.
@@ -71,7 +72,7 @@ str _ccc_str_from_str(str const s)
     char*: str_from_cstring,                                                   \
     str: _ccc_str_from_str,                                                    \
     str_mut: str_from_mut                                                      \
-)(s)
+)(s)                                                                           \
 
 
 /// Short-hand alias to `CCC_STR`.
@@ -81,7 +82,7 @@ str _ccc_str_from_str(str const s)
 
 
 #ifdef CCC_IMPLEMENTATION
-str str_from_cstring(char ref c_str);
-str str_from_mut(str_mut s);
-str _ccc_str_from_str(str s);
+str str_from_cstring(char ref const c_str);
+str str_from_mut(str_mut const s);
+str _ccc_str_from_str(str const s);
 #endif

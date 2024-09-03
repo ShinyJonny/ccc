@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "meta.h"
 #include "primitive.h"
 #include "intrinsics.h"
@@ -225,14 +226,22 @@ str_mut str_slice_incl_mut(
 
 
 #ifdef CCC_IMPLEMENTATION
-Slice_u8 str_as_bytes(str s);
-SliceMut_u8 str_as_bytes_mut(str_mut s);
-str str_from_bytes(Slice_u8 bytes);
-str_mut str_from_bytes_mut(SliceMut_u8 bytes);
-bool str_eq(str a, str b);
-StrSplit str_split_from_mut(StrSplitMut split);
-StrSplit str_split_at(str s, usize idx);
-StrSplitMut str_split_mut_at(str_mut s, usize idx);
-str str_slice_incl(str self, usize start, usize end);
-str_mut str_slice_incl_mut(str_mut self, usize start, usize end);
+Slice_u8 str_as_bytes(str const self);
+SliceMut_u8 str_as_bytes_mut(str_mut const self);
+str str_from_bytes(Slice_u8 const bytes);
+str_mut str_from_bytes_mut(SliceMut_u8 const bytes);
+bool str_eq(str const a, str const b);
+StrSplit str_split_at(str const self, usize const idx);
+StrSplit str_split_from_mut(StrSplitMut const self);
+StrSplitMut str_split_mut_at(str_mut const self, usize const idx);
+Option_usize str_find_char(str const self, char const c);
+Option_usize str_find(str const self, bool (* const predicate)(char, usize));
+str str_slice(str const self, usize const start, usize const end);
+str_mut str_slice_mut(str_mut const self, usize const start, usize const end);
+str str_slice_incl(str const self, usize const start, usize const end);
+str_mut str_slice_incl_mut(
+    str_mut const self,
+    usize const start,
+    usize const end
+);
 #endif

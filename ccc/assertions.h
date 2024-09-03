@@ -1,9 +1,11 @@
 #pragma once
 
+
 #include "meta.h"
 #include "primitive.h"
 #include "option.h"
 #include "util.h"
+
 
 typedef struct {
     str reason;
@@ -11,17 +13,21 @@ typedef struct {
     Option_str context;
 } PanicInfo;
 
+
 NORETURN extern
 void ccc_panic_handler(PanicInfo ref msg);
 
+
 #define PANIC() ccc_panic_handler(&(PanicInfo) { \
     .reason = CCC_STR("explicit panic!"),                                      \
-})
+})                                                                             \
+
 
 #define PANIC_MSG(message) ccc_panic_handler(&(PanicInfo) { \
     .reason = CCC_STR("explicit panic"),                                       \
     .msg    = SOME(CCC_STR(message)),                                          \
-})
+})                                                                             \
+
 
 #define ASSERT(expression) { \
     if (!(expression)) {                                                       \
@@ -30,7 +36,8 @@ void ccc_panic_handler(PanicInfo ref msg);
             .context = SOME(CCC_STR("`" _CCC_STRINGIFY(expression) "`")),      \
         });                                                                    \
     }                                                                          \
-}
+}                                                                              \
+
 
 #define ASSERT_MSG(expression, message) { \
     if (!(expression)) {                                                       \
@@ -40,7 +47,8 @@ void ccc_panic_handler(PanicInfo ref msg);
             .msg     = SOME(CCC_STR(message)),                                 \
         });                                                                    \
     }                                                                          \
-}
+}                                                                              \
+
 
 #define ASSERT_EQ(lhs, rhs) { \
     if ((lhs) != (rhs)) {                                                      \
@@ -55,7 +63,8 @@ void ccc_panic_handler(PanicInfo ref msg);
             )),                                                                \
         });                                                                    \
     }                                                                          \
-}
+}                                                                              \
+
 
 #define ASSERT_EQ_MSG(lhs, rhs, message) { \
     if ((lhs) != (rhs)) {                                                      \
@@ -71,7 +80,8 @@ void ccc_panic_handler(PanicInfo ref msg);
             .msg  = SOME(CCC_STR(message)),                                    \
         });                                                                    \
     }                                                                          \
-}
+}                                                                              \
+
 
 #define ASSERT_NE(lhs, rhs) { \
     if ((lhs) == (rhs)) {                                                      \
@@ -86,7 +96,8 @@ void ccc_panic_handler(PanicInfo ref msg);
             )),                                                                \
         });                                                                    \
     }                                                                          \
-}
+}                                                                              \
+
 
 #define ASSERT_NE_MSG(lhs, rhs, message) { \
     if ((lhs) == (rhs)) {                                                      \
@@ -102,25 +113,30 @@ void ccc_panic_handler(PanicInfo ref msg);
             .msg  = SOME(CCC_STR(message)),                                    \
         });                                                                    \
     }                                                                          \
-}
+}                                                                              \
+
 
 #define TODO() ccc_panic_handler(&(PanicInfo) { \
     .reason = CCC_STR("todo!"),                                                \
-})
+})                                                                             \
+
 
 #define TODO_MSG(message) ccc_panic_handler(&(PanicInfo) { \
     .reason = CCC_STR("todo"),                                                 \
     .msg    = SOME(CCC_STR(message)),                                          \
-})
+})                                                                             \
+
 
 #define UNREACHABLE() ccc_panic_handler(&(PanicInfo) { \
     .reason = CCC_STR("unreachable!"),                                         \
-})
+})                                                                             \
+
 
 #define UNREACHABLE_MSG(message) ccc_panic_handler(&(PanicInfo) { \
     .reason = CCC_STR("unreachable"),                                          \
     .msg    = SOME(CCC_STR(message)),                                          \
-})
+})                                                                             \
+
 
 #ifdef CCC_DEBUG_ASSERTIONS
     #define DEBUG_ASSERT(expression)               ASSERT(expression)
