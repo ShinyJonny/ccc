@@ -1,4 +1,6 @@
 unsafe
+priv
+prot
 life
 COPY
 INLINE_ALWAYS

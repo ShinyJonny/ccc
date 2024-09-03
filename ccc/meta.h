@@ -28,6 +28,8 @@
 
 
 #define unsafe    _Pragma("ccc unsafe")
+#define priv      _Pragma("ccc priv")
+#define prot      _Pragma("ccc prot")
 #define life(...) _Pragma(_CCC_STRINGIFY(ccc lifetime(__VA_ARGS__)))
 #define COPY      _Pragma("ccc set_trait(COPY)")
 
