@@ -31,48 +31,54 @@
 #define priv      _Pragma("ccc priv")
 #define prot      _Pragma("ccc prot")
 #define life(...) _Pragma(_CCC_STRINGIFY(ccc lifetime(__VA_ARGS__)))
-#define COPY      _Pragma("ccc set_trait(COPY)")
 
 
 // Compiler integration.
 
 
+#ifdef _MSC_VER
+    #define CCC_RESTRICT __restrict
+#else
+    #define CCC_RESTRICT restrict
+#endif
+
+
 #ifdef __GNUC__
-    #define INLINE_ALWAYS __attribute__((always_inline)) inline
+    #define CCC_INLINE_ALWAYS __attribute__((always_inline)) inline
 #else
-    #define INLINE_ALWAYS inline
+    #define CCC_INLINE_ALWAYS inline
 #endif
 
 
 #if __STDC_VERSION__ >= 202000L
-    #define NODISCARD [[nodiscard]]
+    #define CCC_NODISCARD [[nodiscard]]
 #elif defined(__clang__) // NOTE: gcc doesn't like `warn_unused_result` on types.
-    #define NODISCARD __attribute__((warn_unused_result))
+    #define CCC_NODISCARD __attribute__((warn_unused_result))
 #else
-    #define NODISCARD _Pragma("ccc nodiscard")
+    #define CCC_NODISCARD _Pragma("ccc nodiscard")
 #endif
 
 
 #if __STDC_VERSION__ >= 202000L
-    #define NORETURN [[noreturn]]
+    #define CCC_NORETURN [[noreturn]]
 #else
-    #define NORETURN _Noreturn
+    #define CCC_NORETURN _Noreturn
 #endif
 
 
 #if __STDC_VERSION__ >= 202000L
-    #define STATIC_ASSERT(expr, msg) static_assert(expr, msg)
+    #define CCC_STATIC_ASSERT(expr, msg) static_assert(expr, msg)
 #else
-    #define STATIC_ASSERT(expr, msg) _Static_assert(expr, msg)
+    #define CCC_STATIC_ASSERT(expr, msg) _Static_assert(expr, msg)
 #endif
 
 
 // TODO: check if these really are just compiler hints.
 #include <stddef.h>
 #if __STDC_VERSION__ >= 202000L
-    #define HINT_UNREACHABLE() unreachable()
+    #define CCC_HINT_UNREACHABLE() unreachable()
 #elif defined(__GNUC__)
-    #define HINT_UNREACHABLE() __builtin_unreachable()
+    #define CCC_HINT_UNREACHABLE() __builtin_unreachable()
 #else
-    #define HINT_UNREACHABLE()
+    #define CCC_HINT_UNREACHABLE()
 #endif

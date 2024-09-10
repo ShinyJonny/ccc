@@ -19,11 +19,6 @@
 #endif
 
 
-#ifndef CCC_IO_BUF_SIZE
-    #define CCC_IO_BUF_SIZE 4096
-#endif
-
-
 typedef enum {
     IoError_FlushFailed,
 } IoError;
@@ -75,7 +70,7 @@ StdioSinkGuard stdio_sink_lock(StdioSink const handle)
     };
 }
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 void stdio_sink_guard__Drop__drop(void ref_mut const void_self);
 
 inline
@@ -87,38 +82,38 @@ void stdio_sink_guard_release(StdioSinkGuard sink)
 inline
 IoResult stdio_sink_guard_flush(StdioSinkGuard ref_mut const self)
 {
-    SliceMut_u8 const buf = slice_u8_slice_mut(
-        array_u8_as_mut(&self->buf->buffer),
+    SliceMut_u8 const used_slice = slice_u8_slice_mut(
+        array_u8_as_slice_mut(&self->buf->buffer),
         0,
         self->buf->head
     );
 
-    Slice_u8 remaining = slice_u8_from_mut(buf);
+    Slice_u8 remaining = slice_u8_from_mut(used_slice);
 
     while (remaining.len > 0) {
         isize count = write(self->buf->fd, remaining.dat, remaining.len);
 
         if (count < 0) {
-            return (IoResult) ERR(IoError_FlushFailed);
+            return (IoResult) CCC_ERR(IoError_FlushFailed);
         }
 
         remaining = slice_u8_slice(remaining, count, remaining.len);
     }
 
-    ccc_memset(buf.dat, '0', buf.len);
+    ccc_memset(used_slice.dat, '0', used_slice.len);
     self->buf->head = 0;
 
-    return (IoResult) OK(unit);
+    return (IoResult) CCC_OK(CCC_UNIT);
 }
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 void stdio_sink_guard__Drop__drop(void ref_mut const void_self)
 {
     StdioSinkGuard ref_mut const self = (void*)void_self;
     atomic_bool_store(self->lock, LOCK_UNLOCKED, MemOrd_Release);
 }
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult stdio_sink_guard__Formatter__write_str(
     void ref_mut const void_ctx,
     str const s
@@ -127,25 +122,25 @@ FmtResult stdio_sink_guard__Formatter__write_str(
     StdioSinkGuard ref_mut const ctx = void_ctx;
     Slice_u8 const bytes = str_as_bytes(s);
 
-    SliceMut_u8 const buf = array_u8_as_mut(&ctx->buf->buffer);
+    Array_u8 ref buffer = &ctx->buf->buffer;
 
-    if (ctx->buf->head + bytes.len > buf.len) {
+    if (ctx->buf->head + bytes.len > buffer->len) {
         IoResult ret;
         if ((ret = stdio_sink_guard_flush(ctx)).is_err) {
-            return (FmtResult) ERR((FmtError) {
+            return (FmtResult) CCC_ERR((FmtError) {
                 .kind = FmtErrorKind_FormatterError,
                 .fmt_error = ret.err,
             });
         };
     }
 
-    ccc_copy_nonoverlapping(buf.dat + ctx->buf->head, bytes.dat, bytes.len);
+    ccc_copy_nonoverlapping(buffer->dat + ctx->buf->head, bytes.dat, bytes.len);
     ctx->buf->head += bytes.len;
 
-    return (FmtResult) OK(unit);
+    return (FmtResult) CCC_OK(CCC_UNIT);
 }
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult stdio_sink_guard__Formatter__write_char(
     void ref_mut const void_ctx,
     char const c
@@ -153,21 +148,21 @@ FmtResult stdio_sink_guard__Formatter__write_char(
 {
     StdioSinkGuard ref_mut ctx = void_ctx;
 
-    SliceMut_u8 const buf = array_u8_as_mut(&ctx->buf->buffer);
+    Array_u8 ref const buffer = &ctx->buf->buffer;
 
-    if (ctx->buf->head >= buf.len) {
+    if (ctx->buf->head >= buffer->len) {
         IoResult ret;
         if ((ret = stdio_sink_guard_flush(ctx)).is_err) {
-            return (FmtResult) ERR((FmtError) {
+            return (FmtResult) CCC_ERR((FmtError) {
                 .kind = FmtErrorKind_FormatterError,
                 .fmt_error = ret.err,
             });
         };
     }
-    buf.dat[ctx->buf->head] = c;
+    buffer->dat[ctx->buf->head] = c;
     ctx->buf->head += 1;
 
-    return (FmtResult) OK(unit);
+    return (FmtResult) CCC_OK(CCC_UNIT);
 }
 
 static
@@ -178,7 +173,7 @@ Formatter const STDIO_SINK_GUARD__Formatter = {
     .write_char = stdio_sink_guard__Formatter__write_char,
 };
 
-static INLINE_ALWAYS
+static CCC_INLINE_ALWAYS
 DynRefMut_Formatter stdio_sink_guard_as_dyn_mut_formatter(
     StdioSinkGuard ref_mut const self
 )
@@ -203,16 +198,18 @@ extern StdioSink io_stdout(void);
 AtomicBool _CCC_STDERR_LOCK = ATOMIC_BOOL_CREATE_FALSE();
 AtomicBool _CCC_STDOUT_LOCK = ATOMIC_BOOL_CREATE_FALSE();
 
+#define CCC_IO_BUF_SIZE 4096
 StdioSinkBuf _CCC_STDERR = {
-    .buffer = array(u8, CCC_IO_BUF_SIZE, 0),
+    .buffer = ccc_array(u8, CCC_IO_BUF_SIZE, 0),
     .head   = 0,
     .fd     = STDERR_FILENO,
 };
 StdioSinkBuf _CCC_STDOUT = {
-    .buffer = array(u8, CCC_IO_BUF_SIZE, 0),
+    .buffer = ccc_array(u8, CCC_IO_BUF_SIZE, 0),
     .head   = 0,
     .fd     = STDOUT_FILENO,
 };
+#undef CCC_IO_BUF_SIZE
 
 
 /// Gets the handle to the *standard error* sink and initialises it (if not
@@ -241,7 +238,7 @@ StdioSink io_stdout(void)
 }
 
 
-NORETURN
+CCC_NORETURN
 void ccc_panic_handler(PanicInfo ref const info)
 {
     StdioSinkGuard std_err = stdio_sink_lock(io_stderr());

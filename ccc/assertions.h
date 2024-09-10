@@ -14,47 +14,47 @@ typedef struct {
 } PanicInfo;
 
 
-NORETURN extern
+CCC_NORETURN extern
 void ccc_panic_handler(PanicInfo ref msg);
 
 
-#define PANIC() ccc_panic_handler(&(PanicInfo) { \
+#define CCC_PANIC() ccc_panic_handler(&(PanicInfo) { \
     .reason = CCC_STR("explicit panic!"),                                      \
 })                                                                             \
 
 
-#define PANIC_MSG(message) ccc_panic_handler(&(PanicInfo) { \
+#define CCC_PANIC_MSG(message) ccc_panic_handler(&(PanicInfo) { \
     .reason = CCC_STR("explicit panic"),                                       \
-    .msg    = SOME(CCC_STR(message)),                                          \
+    .msg    = CCC_SOME(CCC_STR(message)),                                      \
 })                                                                             \
 
 
-#define ASSERT(expression) { \
+#define CCC_ASSERT(expression) { \
     if (!(expression)) {                                                       \
         ccc_panic_handler(&(PanicInfo) {                                       \
             .reason  = CCC_STR("assertion failed"),                            \
-            .context = SOME(CCC_STR("`" _CCC_STRINGIFY(expression) "`")),      \
+            .context = CCC_SOME(CCC_STR("`" _CCC_STRINGIFY(expression) "`")),  \
         });                                                                    \
     }                                                                          \
 }                                                                              \
 
 
-#define ASSERT_MSG(expression, message) { \
+#define CCC_ASSERT_MSG(expression, message) { \
     if (!(expression)) {                                                       \
         ccc_panic_handler(&(PanicInfo) {                                       \
             .reason  = CCC_STR("assertion failed"),                            \
-            .context = SOME(CCC_STR("`" _CCC_STRINGIFY(expression) "`")),      \
-            .msg     = SOME(CCC_STR(message)),                                 \
+            .context = CCC_SOME(CCC_STR("`" _CCC_STRINGIFY(expression) "`")),  \
+            .msg     = CCC_SOME(CCC_STR(message)),                             \
         });                                                                    \
     }                                                                          \
 }                                                                              \
 
 
-#define ASSERT_EQ(lhs, rhs) { \
+#define CCC_ASSERT_EQ(lhs, rhs) { \
     if ((lhs) != (rhs)) {                                                      \
         ccc_panic_handler(&(PanicInfo) {                                       \
             .reason  = CCC_STR("equality assertionn failed"),                  \
-            .context = SOME(CCC_STR(                                           \
+            .context = CCC_SOME(CCC_STR(                                       \
                 "`"                                                            \
                 _CCC_STRINGIFY(lhs)                                            \
                 "` != `"                                                       \
@@ -66,28 +66,28 @@ void ccc_panic_handler(PanicInfo ref msg);
 }                                                                              \
 
 
-#define ASSERT_EQ_MSG(lhs, rhs, message) { \
+#define CCC_ASSERT_EQ_MSG(lhs, rhs, message) { \
     if ((lhs) != (rhs)) {                                                      \
         ccc_panic_handler(&(PanicInfo) {                                       \
             .reason  = CCC_STR("equality assertionn failed"),                  \
-            .context = SOME(CCC_STR(                                           \
+            .context = CCC_SOME(CCC_STR(                                       \
                 "`"                                                            \
                 _CCC_STRINGIFY(lhs)                                            \
                 "` != `"                                                       \
                 _CCC_STRINGIFY(rhs)                                            \
                 "`"                                                            \
             )),                                                                \
-            .msg  = SOME(CCC_STR(message)),                                    \
+            .msg  = CCC_SOME(CCC_STR(message)),                                \
         });                                                                    \
     }                                                                          \
 }                                                                              \
 
 
-#define ASSERT_NE(lhs, rhs) { \
+#define CCC_ASSERT_NE(lhs, rhs) { \
     if ((lhs) == (rhs)) {                                                      \
         ccc_panic_handler(&(PanicInfo) {                                       \
             .reason  = CCC_STR("inequality assertionn failed"),                \
-            .context = SOME(CCC_STR(                                           \
+            .context = CCC_SOME(CCC_STR(                                       \
                 "`"                                                            \
                 _CCC_STRINGIFY(lhs)                                            \
                 "` == `"                                                       \
@@ -99,61 +99,61 @@ void ccc_panic_handler(PanicInfo ref msg);
 }                                                                              \
 
 
-#define ASSERT_NE_MSG(lhs, rhs, message) { \
+#define CCC_ASSERT_NE_MSG(lhs, rhs, message) { \
     if ((lhs) == (rhs)) {                                                      \
         ccc_panic_handler(&(PanicInfo) {                                       \
             .reason  = CCC_STR("inequality assertionn failed"),                \
-            .context = SOME(CCC_STR(                                           \
+            .context = CCC_SOME(CCC_STR(                                       \
                 "`"                                                            \
                 _CCC_STRINGIFY(lhs)                                            \
                 "` == `"                                                       \
                 _CCC_STRINGIFY(rhs)                                            \
                 "`"                                                            \
             )),                                                                \
-            .msg  = SOME(CCC_STR(message)),                                    \
+            .msg  = CCC_SOME(CCC_STR(message)),                                \
         });                                                                    \
     }                                                                          \
 }                                                                              \
 
 
-#define TODO() ccc_panic_handler(&(PanicInfo) { \
+#define CCC_TODO() ccc_panic_handler(&(PanicInfo) { \
     .reason = CCC_STR("todo!"),                                                \
 })                                                                             \
 
 
-#define TODO_MSG(message) ccc_panic_handler(&(PanicInfo) { \
+#define CCC_TODO_MSG(message) ccc_panic_handler(&(PanicInfo) { \
     .reason = CCC_STR("todo"),                                                 \
-    .msg    = SOME(CCC_STR(message)),                                          \
+    .msg    = CCC_SOME(CCC_STR(message)),                                      \
 })                                                                             \
 
 
-#define UNREACHABLE() ccc_panic_handler(&(PanicInfo) { \
+#define CCC_UNREACHABLE() ccc_panic_handler(&(PanicInfo) { \
     .reason = CCC_STR("unreachable!"),                                         \
 })                                                                             \
 
 
-#define UNREACHABLE_MSG(message) ccc_panic_handler(&(PanicInfo) { \
+#define CCC_UNREACHABLE_MSG(message) ccc_panic_handler(&(PanicInfo) { \
     .reason = CCC_STR("unreachable"),                                          \
-    .msg    = SOME(CCC_STR(message)),                                          \
+    .msg    = CCC_SOME(CCC_STR(message)),                                      \
 })                                                                             \
 
 
 #ifdef CCC_DEBUG_ASSERTIONS
-    #define DEBUG_ASSERT(expression)               ASSERT(expression)
-    #define DEBUG_ASSERT_MSG(expr, message)        ASSERT_MSG(expr, message)
-    #define DEBUG_ASSERT_EQ(lhs, rhs)              ASSERT_EQ(lhs, rhs)
-    #define DEBUG_ASSERT_EQ_MSG(lhs, rhs, message) ASSERT_EQ_MSG(lhs, rhs, message)
-    #define DEBUG_ASSERT_NE(lhs, rhs)              ASSERT_NE(lhs, rhs)
-    #define DEBUG_ASSERT_NE_MSG(lhs, rhs, message) ASSERT_NE_MSG(lhs, rhs, message)
-    #define DEBUG_UNREACHABLE()                    UNREACHABLE()
-    #define DEBUG_UNREACHABLE_MSG(message)         UNREACHABLE_MSG(message)
+    #define CCC_DEBUG_ASSERT(expression)               CCC_ASSERT(expression)
+    #define CCC_DEBUG_ASSERT_MSG(expr, message)        CCC_ASSERT_MSG(expr, message)
+    #define CCC_DEBUG_ASSERT_EQ(lhs, rhs)              CCC_ASSERT_EQ(lhs, rhs)
+    #define CCC_DEBUG_ASSERT_EQ_MSG(lhs, rhs, message) CCC_ASSERT_EQ_MSG(lhs, rhs, message)
+    #define CCC_DEBUG_ASSERT_NE(lhs, rhs)              CCC_ASSERT_NE(lhs, rhs)
+    #define CCC_DEBUG_ASSERT_NE_MSG(lhs, rhs, message) CCC_ASSERT_NE_MSG(lhs, rhs, message)
+    #define CCC_DEBUG_UNREACHABLE()                    CCC_UNREACHABLE()
+    #define CCC_DEBUG_UNREACHABLE_MSG(message)         CCC_UNREACHABLE_MSG(message)
 #else
-    #define DEBUG_ASSERT(expr)
-    #define DEBUG_ASSERT_MSG(expr, message)
-    #define DEBUG_ASSERT_EQ(lhs, rhs)
-    #define DEBUG_ASSERT_EQ_MSG(lhs, rhs, message)
-    #define DEBUG_ASSERT_NE(lhs, rhs)
-    #define DEBUG_ASSERT_NE_MSG(lhs, rhs, message)
-    #define DEBUG_UNREACHABLE()            HINT_UNREACHABLE()
-    #define DEBUG_UNREACHABLE_MSG(message) HINT_UNREACHABLE()
+    #define CCC_DEBUG_ASSERT(expr)
+    #define CCC_DEBUG_ASSERT_MSG(expr, message)
+    #define CCC_DEBUG_ASSERT_EQ(lhs, rhs)
+    #define CCC_DEBUG_ASSERT_EQ_MSG(lhs, rhs, message)
+    #define CCC_DEBUG_ASSERT_NE(lhs, rhs)
+    #define CCC_DEBUG_ASSERT_NE_MSG(lhs, rhs, message)
+    #define CCC_DEBUG_UNREACHABLE()            CCC_HINT_UNREACHABLE()
+    #define CCC_DEBUG_UNREACHABLE_MSG(message) CCC_HINT_UNREACHABLE()
 #endif

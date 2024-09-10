@@ -6,7 +6,7 @@
 #include "intrinsics.h"
 
 
-#define _CCC_STR_FROM_CSTRING_LITERAL(s) ((str) { \
+#define CCC_UNSAFE_STATIC_STR(s) ((str) { \
     .dat = s,                                                                  \
     .len = sizeof s,                                                           \
 })                                                                             \
@@ -18,22 +18,22 @@
 ///
 /// ```
 /// str const s = make_str();
-/// printf(STRF, PSTR(s));
+/// printf(CCC_STRF, CCC_PSTR(s));
 /// ```
-#define PSTR(s) (int)(s).len, (s).dat
+#define CCC_PSTR(s) (int)(s).len, (s).dat
 /// Format literal for printing `str` and `str_mut`.
 ///
 /// # Example
 ///
 /// ```
 /// str const s = make_str();
-/// printf("This is a `str`: \"" STRF "\".\n", PSTR(s));
+/// printf("This is a `str`: \"" CCC_STRF "\".\n", CCC_PSTR(s));
 /// ```
-#define STRF "%.*s"
+#define CCC_STRF "%.*s"
 
 
 /// Converts a C string to `str`.
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 str str_from_cstring(char ref const c_str)
 {
     return (str){
@@ -46,7 +46,7 @@ str str_from_cstring(char ref const c_str)
 /// Downcasts `str_mut` to `str`.
 ///
 /// NOTE: this cannot be done the other way around.
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 str str_from_mut(str_mut const s)
 {
     return (str){
@@ -56,8 +56,8 @@ str str_from_mut(str_mut const s)
 }
 
 
-INLINE_ALWAYS
-str _ccc_str_from_str(str const s)
+CCC_INLINE_ALWAYS
+str _ccc_str_as_str(str const s)
 {
     return s;
 }
@@ -70,19 +70,13 @@ str _ccc_str_from_str(str const s)
 /// immutable versions.
 #define CCC_STR(s) _Generic((s), \
     char*: str_from_cstring,                                                   \
-    str: _ccc_str_from_str,                                                    \
+    str: _ccc_str_as_str,                                                      \
     str_mut: str_from_mut                                                      \
 )(s)                                                                           \
-
-
-/// Short-hand alias to `CCC_STR`.
-///
-/// Users can undefine this if they want to.
-#define cs(s) CCC_STR(s)
 
 
 #ifdef CCC_IMPLEMENTATION
 str str_from_cstring(char ref const c_str);
 str str_from_mut(str_mut const s);
-str _ccc_str_from_str(str const s);
+str _ccc_str_as_str(str const s);
 #endif

@@ -23,9 +23,9 @@ MainResult run(SlotList ref const list)
     BufFormatter buf_fmt = buf_fmt_create((Array_u8)array(u8, 1024, 0));
     DynRefMut_Formatter const fmt = buf_fmt_as_dyn_mut_formatter(&buf_fmt);
 
-    StrSplit const split = str_split_at(cs("Harro, everynyan!"), 5);
+    Pair_str const split = str_split_at(cs("Harro, everynyan!"), 5);
     FmtResult result;
-    if ((result = str_fmt(fmt, cs("StrSplit (\""))).is_err) {
+    if ((result = str_fmt(fmt, cs("Pair_str(\""))).is_err) {
         return (MainResult) ERR(result.err);
     }
     if ((result = str_fmt(fmt, split._0)).is_err) {
@@ -51,7 +51,7 @@ MainResult run(SlotList ref const list)
     str const final = buf_fmt_get_str(&buf_fmt);
     printf(STRF "\n", PSTR(final));
 
-    return (MainResult) OK(unit);
+    return (MainResult) OK(UNIT);
 }
 
 
@@ -73,18 +73,18 @@ int main(void)
 
     SlotListIdResult const first = slot_list_append(&list);
     ASSERT(!first.is_err);
-    list_data.ptr[first.ok.idx] = (Node){ .magic = 3, .text = cs("three") };
+    list_data.dat[first.ok.idx] = (Node){ .magic = 3, .text = cs("three") };
     ASSERT(list.tail.idx == first.ok.idx);
     ASSERT(!slot_list_next(&list, first.ok).is_some);
     SlotListIdResult const second = slot_list_append(&list);
     ASSERT(!second.is_err);
-    list_data.ptr[second.ok.idx] = (Node){ .magic = 6, .text = cs("six") };
+    list_data.dat[second.ok.idx] = (Node){ .magic = 6, .text = cs("six") };
     ASSERT(slot_list_next(&list, first.ok).is_some);
     ASSERT(slot_list_next(&list, first.ok).val.idx == second.ok.idx);
     ASSERT(list.tail.idx == second.ok.idx);
     SlotListIdResult const third = slot_list_prepend(&list);
     ASSERT(!third.is_err);
-    list_data.ptr[third.ok.idx] = (Node){ .magic = 9, .text = cs("nine") };
+    list_data.dat[third.ok.idx] = (Node){ .magic = 9, .text = cs("nine") };
 
     MainResult const result = run(&list);
     if (result.is_err) {

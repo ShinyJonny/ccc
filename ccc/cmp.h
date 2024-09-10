@@ -6,33 +6,33 @@
 
 
 #define _ccc_def_numeric_eq_min_max(type) \
-INLINE_ALWAYS                                                                  \
-bool type##_eq(type const a, type const b)                                     \
+CCC_INLINE_ALWAYS                                                              \
+bool type##_eq(type ref const a, type ref const b)                             \
 {                                                                              \
-    return a == b;                                                             \
+    return *a == *b;                                                           \
 }                                                                              \
                                                                                \
-INLINE_ALWAYS                                                                  \
-type type##_min(type const a, type const b)                                    \
+CCC_INLINE_ALWAYS                                                              \
+type type##_min(type ref const a, type ref const b)                            \
 {                                                                              \
-    return a <= b                                                              \
-        ? a                                                                    \
-        : b;                                                                   \
+    return *a <= *b                                                            \
+        ? *a                                                                   \
+        : *b;                                                                  \
 }                                                                              \
                                                                                \
-INLINE_ALWAYS                                                                  \
-type type##_max(type const a, type const b)                                    \
+CCC_INLINE_ALWAYS                                                              \
+type type##_max(type ref const a, type ref const b)                            \
 {                                                                              \
-    return a <= b                                                              \
-        ? b                                                                    \
-        : a;                                                                   \
+    return *a <= *b                                                            \
+        ? *b                                                                   \
+        : *a;                                                                  \
 }                                                                              \
 
 
 #define _ccc_decl_numeric_eq_min_max(type) \
-bool type##_eq(type const a, type const b);                                    \
-type type##_min(type const a, type const b);                                   \
-type type##_max(type const a, type const b);                                   \
+bool type##_eq(type ref const a, type ref const b);                            \
+type type##_min(type ref const a, type ref const b);                           \
+type type##_max(type ref const a, type ref const b);                           \
 
 
 _ccc_def_numeric_eq_min_max(u8)
@@ -54,25 +54,51 @@ _ccc_def_numeric_eq_min_max(iptr)
 _ccc_def_numeric_eq_min_max(bool)
 
 
-INLINE_ALWAYS
-bool __unit_eq(__unit const a, __unit const b)
+CCC_INLINE_ALWAYS
+bool __unit_eq(__unit ref const a, __unit ref const b)
 {
     (void)a; (void)b;
     return true;
 }
 
-INLINE_ALWAYS
-__unit __unit_min(__unit const a, __unit const b)
+CCC_INLINE_ALWAYS
+__unit __unit_min(__unit ref const a, __unit ref const b)
 {
     (void)a; (void)b;
-    return unit;
+    return CCC_UNIT;
 }
 
-INLINE_ALWAYS
-__unit __unit_max(__unit const a, __unit const b)
+CCC_INLINE_ALWAYS
+__unit __unit_max(__unit ref const a, __unit ref const b)
 {
     (void)a; (void)b;
-    return unit;
+    return CCC_UNIT;
+}
+
+
+/// Checks if `a` and `b` are equal.
+CCC_INLINE_ALWAYS
+bool str_eq(str ref const a, str ref const b)
+{
+    if (a->len != b->len) {
+        return false;
+    }
+
+    usize const len = a->len;
+    return ccc_mem_eq((u8 ref)a->dat, (u8 ref)b->dat, len);
+}
+
+
+/// Checks if `a` and `b` are equal.
+CCC_INLINE_ALWAYS
+bool str_mut_eq(str_mut ref const a, str_mut ref const b)
+{
+    if (a->len != b->len) {
+        return false;
+    }
+
+    usize const len = a->len;
+    return ccc_mem_eq((u8 ref)a->dat, (u8 ref)b->dat, len);
 }
 
 
@@ -98,9 +124,12 @@ _ccc_decl_numeric_eq_min_max(iptr)
 
 _ccc_decl_numeric_eq_min_max(bool)
 
-bool __unit_eq(__unit const a, __unit const b);
-__unit __unit_min(__unit const a, __unit const b);
-__unit __unit_max(__unit const a, __unit const b);
+
+bool __unit_eq(__unit ref const a, __unit ref const b);
+__unit __unit_min(__unit ref const a, __unit ref const b);
+__unit __unit_max(__unit ref const a, __unit ref const b);
+bool str_eq(str ref const a, str ref const b);
+bool str_mut_eq(str_mut ref const a, str_mut ref const b);
 #endif
 
 

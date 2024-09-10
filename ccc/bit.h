@@ -7,7 +7,7 @@
 
 
 /// Creates a bit field with the length enough to hold `count` bits.
-#define bit_field(count, ...) \
+#define ccc_bit_field(count, ...) \
 ((BitField){                                                                   \
     .bytes = array(u8, ((count) + 7) >> 3, __VA_ARGS__),                       \
 })                                                                             \
@@ -39,15 +39,13 @@ bool bit_field_get_composite(
     usize const bit
 )
 {
-    Slice_u8 const bytes = array_u8_as_ref(&self->bytes);
+    CCC_ASSERT_MSG(byte < self->bytes.len, "index out of bounds");
 
-    ASSERT_MSG(byte < bytes.len, "index out of bounds");
-
-    return ((bytes.dat[byte] >> bit) & (u8)0x01) == 1;
+    return ((self->bytes.dat[byte] >> bit) & (u8)0x01) == 1;
 }
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 bool bit_field_get(BitField ref const self, usize const pos)
 {
     usize const byte = pos >> 3;
@@ -64,15 +62,13 @@ void bit_field_set_composite(
     usize const bit
 )
 {
-    SliceMut_u8 const bytes = array_u8_as_mut(&self->bytes);
+    CCC_ASSERT_MSG(byte < self->bytes.len, "index out of bounds");
 
-    ASSERT_MSG(byte < bytes.len, "index out of bounds");
-
-    bytes.dat[byte] |= ((u8)0x01 << bit);
+    self->bytes.dat[byte] |= ((u8)0x01 << bit);
 }
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 void bit_field_set(BitField ref_mut const self, usize const pos)
 {
     usize const byte = pos >> 3;
@@ -89,15 +85,13 @@ void bit_field_clear_composite(
     usize const bit
 )
 {
-    SliceMut_u8 const bytes = array_u8_as_mut(&self->bytes);
+    CCC_ASSERT_MSG(byte < self->bytes.len, "index out of bounds");
 
-    ASSERT_MSG(byte < bytes.len, "index out of bounds");
-
-    bytes.dat[byte] &= ~(0x01 << bit);
+    self->bytes.dat[byte] &= ~(0x01 << bit);
 }
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 void bit_field_clear(BitField ref_mut const self, usize const pos)
 {
     usize const byte = pos >> 3;
@@ -110,18 +104,14 @@ void bit_field_clear(BitField ref_mut const self, usize const pos)
 inline
 void bit_field_clear_all(BitField ref_mut const self)
 {
-    SliceMut_u8 const bytes = array_u8_as_mut(&self->bytes);
-
-    slice_u8_fill(bytes, 0x00);
+    slice_u8_fill(array_u8_as_slice_mut(&self->bytes), 0x00);
 }
 
 
 inline
 void bit_field_set_all(BitField ref_mut const self)
 {
-    SliceMut_u8 const bytes = array_u8_as_mut(&self->bytes);
-
-    slice_u8_fill(bytes, 0xff);
+    slice_u8_fill(array_u8_as_slice_mut(&self->bytes), 0xff);
 }
 
 

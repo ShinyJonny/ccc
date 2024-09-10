@@ -12,7 +12,7 @@
 
 
 /// Computes the length of a c-string.
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 usize ccc_c_str_len(char const* const s)
 {
     return strlen(s);
@@ -21,7 +21,7 @@ usize ccc_c_str_len(char const* const s)
 
 /// Compares the first `len` bytes pointed to by `a` and `b`, and returns if
 /// they are the same.
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 bool ccc_mem_eq(u8 const* const a, u8 const* const b, usize const len) {
     return memcmp(a, b, len) == 0;
 }
@@ -30,10 +30,10 @@ bool ccc_mem_eq(u8 const* const a, u8 const* const b, usize const len) {
 /// Copies the first `len` bytes from `src` to `dest` (non-overlapping).
 ///
 /// `src` must not overlap with `dest`.
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 void ccc_copy_nonoverlapping(
-    u8* restrict const dest,
-    u8 const* restrict const src,
+    u8* CCC_RESTRICT const dest,
+    u8 const* CCC_RESTRICT const src,
     usize const len
 )
 {
@@ -42,9 +42,9 @@ void ccc_copy_nonoverlapping(
 
 
 /// Copies `byte` to the first `len` bytes pointed to by `dest`.
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 void ccc_memset(
-    u8* restrict const dest,
+    u8* CCC_RESTRICT const dest,
     u8 const byte,
     usize const len
 )
@@ -94,8 +94,8 @@ bool ccc_mem_eq(
 /// `src` must not overlap with `dest`.
 INLINE_ALWAYS
 void ccc_copy_nonoverlapping(
-    u8* restrict const dest,
-    u8 const* restrict const src,
+    u8* CCC_RESTRICT const dest,
+    u8 const* CCC_RESTRICT const src,
     usize const len
 )
 {
@@ -108,7 +108,7 @@ void ccc_copy_nonoverlapping(
 /// Copies `byte` to the first `len` bytes pointed to by `dest`.
 INLINE_ALWAYS
 void ccc_memset(
-    u8* restrict const dest,
+    u8* CCC_RESTRICT const dest,
     u8 const byte,
     usize const len
 )
@@ -126,12 +126,12 @@ void ccc_memset(
 usize ccc_c_str_len(char const* const s);
 bool ccc_mem_eq(u8 const* const a, u8 const* const b, usize const len);
 void ccc_copy_nonoverlapping(
-    u8* restrict const dest,
+    u8* CCC_RESTRICT const dest,
     u8 const* const src,
     usize const len
 );
 void ccc_memset(
-    u8* restrict const dest,
+    u8* CCC_RESTRICT const dest,
     u8 const byte,
     usize const len
 );

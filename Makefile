@@ -20,7 +20,7 @@ all: testbin
 CCC_HDR=$(wildcard ccc/*.h)
 CCC_COLL_HDR=$(wildcard ccc_coll/*.h)
 
-TEST_SRC=test.c buffmt.c
+TEST_SRC=testbin.c buffmt.c
 TEST_HDR=buffmt.h ${CCC_HDR} ${CCC_COLL_HDR}
 TEST_INCLUDE= -I ../ccc -I ../ccc_coll
 testbin: ${TEST_SRC} ${TEST_HDR}

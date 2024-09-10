@@ -12,14 +12,14 @@ typedef struct {
 
 typedef struct {
     void ref_mut dst;
-    struct { VTableHdr hdr; } const* restrict vtable;
+    struct { VTableHdr hdr; } const* CCC_RESTRICT vtable;
 } DropRefMut;
 
 
 #define CCC_DEF_DYN_REF_NAMED(iface_type, refname) \
 typedef struct {                                                               \
     void ref dst;                                                              \
-    iface_type const* restrict vtable;                                         \
+    iface_type const* CCC_RESTRICT vtable;                                     \
 } refname                                                                      \
 
 
@@ -30,7 +30,7 @@ typedef struct {                                                               \
 #define CCC_DEF_DYN_REF_MUT_NAMED(iface_type, refname) \
 typedef struct {                                                               \
     void ref_mut dst;                                                          \
-    iface_type const* restrict vtable;                                         \
+    iface_type const* CCC_RESTRICT vtable;                                     \
 } refname                                                                      \
 
 

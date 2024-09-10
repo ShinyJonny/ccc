@@ -55,7 +55,7 @@ CCC_DEF_DYN_REF_MUT(Formatter);
 
 
 /// Writes a str into a formatter.
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult fmt_write_str(DynRefMut_Formatter const f, str const s)
 {
     return f.vtable->write_str(f.dst, s);
@@ -63,7 +63,7 @@ FmtResult fmt_write_str(DynRefMut_Formatter const f, str const s)
 
 
 /// Writes a `char` into the formatter.
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult fmt_write_char(DynRefMut_Formatter const f, char const c)
 {
     return f.vtable->write_char(f.dst, c);
@@ -76,7 +76,7 @@ FmtResult fmt_write_char(DynRefMut_Formatter const f, char const c)
 // ** Primitive types.
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult u64_fmt(DynRefMut_Formatter const f, u64 num)
 {
     if (num == 0) {
@@ -104,28 +104,28 @@ FmtResult u64_fmt(DynRefMut_Formatter const f, u64 num)
 }
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult u32_fmt(DynRefMut_Formatter const f, u32 const num)
 {
     return u64_fmt(f, num);
 }
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult u16_fmt(DynRefMut_Formatter const f, u16 const num)
 {
     return u64_fmt(f, num);
 }
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult u8_fmt(DynRefMut_Formatter const f, u8 const num)
 {
     return u64_fmt(f, num);
 }
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult i64_fmt(DynRefMut_Formatter const f, i64 num)
 {
     if (num < 0) {
@@ -139,28 +139,28 @@ FmtResult i64_fmt(DynRefMut_Formatter const f, i64 num)
 }
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult i32_fmt(DynRefMut_Formatter const f, i32 const num)
 {
     return i64_fmt(f, num);
 }
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult i16_fmt(DynRefMut_Formatter const f, i16 const num)
 {
     return i64_fmt(f, num);
 }
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult i8_fmt(DynRefMut_Formatter const f, i8 const num)
 {
     return i64_fmt(f, num);
 }
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult usize_fmt(DynRefMut_Formatter const f, usize const num)
 {
     // FIXME: better picking of the integer size.
@@ -168,7 +168,7 @@ FmtResult usize_fmt(DynRefMut_Formatter const f, usize const num)
 }
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult isize_fmt(DynRefMut_Formatter const f, isize const num)
 {
     // FIXME: better picking of the integer size.
@@ -176,7 +176,7 @@ FmtResult isize_fmt(DynRefMut_Formatter const f, isize const num)
 }
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult bool_fmt(DynRefMut_Formatter const f, bool const b)
 {
     if (b) {
@@ -187,7 +187,7 @@ FmtResult bool_fmt(DynRefMut_Formatter const f, bool const b)
 }
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult __unit_fmt_dbg(DynRefMut_Formatter const f, __unit const _)
 {
     (void)_;
@@ -198,7 +198,7 @@ FmtResult __unit_fmt_dbg(DynRefMut_Formatter const f, __unit const _)
 // ** assertion
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult panic_info_fmt(DynRefMut_Formatter const f, PanicInfo ref const self)
 {
     FmtResult res;
@@ -212,21 +212,21 @@ FmtResult panic_info_fmt(DynRefMut_Formatter const f, PanicInfo ref const self)
         if ((res = fmt_write_str(f, self->msg.val)).is_err) { return res; }
     }
 
-    return (FmtResult) OK(unit);
+    return (FmtResult) CCC_OK(CCC_UNIT);
 }
 
 
 // ** str TODO
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult str_fmt(DynRefMut_Formatter const f, str const s)
 {
     return fmt_write_str(f, s);
 }
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult str_fmt_dbg(DynRefMut_Formatter const f, str const s)
 {
     FmtResult res;
@@ -234,12 +234,12 @@ FmtResult str_fmt_dbg(DynRefMut_Formatter const f, str const s)
     if ((res = fmt_write_str(f, s)   ).is_err) { return res; }
     if ((res = fmt_write_char(f, '"')).is_err) { return res; }
 
-    return (FmtResult) OK(unit);
+    return (FmtResult) CCC_OK(CCC_UNIT);
 }
 
 
-INLINE_ALWAYS
-FmtResult str_split_fmt_dbg(DynRefMut_Formatter const f, StrSplit const split)
+CCC_INLINE_ALWAYS
+FmtResult str_split_fmt_dbg(DynRefMut_Formatter const f, Pair_str const split)
 {
     FmtResult res;
     if ((res = fmt_write_char(f, '(')).is_err)       { return res; }
@@ -253,7 +253,7 @@ FmtResult str_split_fmt_dbg(DynRefMut_Formatter const f, StrSplit const split)
 // ** Format Types
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 FmtResult fmt_error_fmt_dbg(
     DynRefMut_Formatter const f,
     FmtError ref const e
@@ -281,7 +281,7 @@ FmtResult fmt_error_fmt_dbg(
     }
     }
 
-    DEBUG_UNREACHABLE();
+    CCC_DEBUG_UNREACHABLE();
 }
 
 
@@ -303,7 +303,7 @@ FmtResult __unit_fmt_dbg(DynRefMut_Formatter const f, __unit const _);
 FmtResult panic_info_fmt(DynRefMut_Formatter const f, PanicInfo ref const self);
 FmtResult str_fmt(DynRefMut_Formatter const f, str const s);
 FmtResult str_fmt_dbg(DynRefMut_Formatter const f, str const s);
-FmtResult str_split_fmt_dbg(DynRefMut_Formatter const f, StrSplit const split);
+FmtResult str_split_fmt_dbg(DynRefMut_Formatter const f, Pair_str const split);
 FmtResult fmt_error_fmt_dbg(
     DynRefMut_Formatter const f,
     FmtError ref const e

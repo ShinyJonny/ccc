@@ -26,7 +26,7 @@ typedef enum {
 } MemOrd;
 
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 memory_order _ccc_mem_ord_to_memory_order(MemOrd const self)
 {
     switch (self) {
@@ -42,12 +42,12 @@ memory_order _ccc_mem_ord_to_memory_order(MemOrd const self)
         return memory_order_seq_cst;
     }
 
-    DEBUG_UNREACHABLE();
+    CCC_DEBUG_UNREACHABLE();
 }
 
 
 /// Tests whether `ord` is valid for a load operation.
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 bool mem_ord_is_valid_load(MemOrd const ord)
 {
     switch (ord) {
@@ -61,7 +61,7 @@ bool mem_ord_is_valid_load(MemOrd const ord)
 
 
 /// Tests whether `ord` is valid for a store operation.
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 bool mem_ord_is_valid_store(MemOrd const ord)
 {
     switch (ord) {
@@ -92,7 +92,7 @@ CmpXchgResult_##typename impl_prefix##_compare_exchange_weak(                  \
 {                                                                              \
     if (!mem_ord_is_valid_load(failure)) {                                     \
         /* TODO: format the ordering. */                                       \
-        PANIC_MSG("invalid memory ordering for the failure case");             \
+        CCC_PANIC_MSG("invalid memory ordering for the failure case");         \
     }                                                                          \
                                                                                \
     /* SAFETY: we can cast an immutable ref to `inner` to a mutable pointer, */\
@@ -107,9 +107,9 @@ CmpXchgResult_##typename impl_prefix##_compare_exchange_weak(                  \
     );                                                                         \
                                                                                \
     if (exchanged) {                                                           \
-        return (CmpXchgResult_##typename) OK(expected);                        \
+        return (CmpXchgResult_##typename) CCC_OK(expected);                    \
     } else {                                                                   \
-        return (CmpXchgResult_##typename) ERR(expected);                       \
+        return (CmpXchgResult_##typename) CCC_ERR(expected);                   \
     }                                                                          \
 }                                                                              \
                                                                                \
@@ -118,7 +118,7 @@ type impl_prefix##_load(atomic_typename ref const self, MemOrd const ordering) \
 {                                                                              \
     if (!mem_ord_is_valid_load(ordering)) {                                    \
         /* TODO: format the ordering. */                                       \
-        PANIC_MSG("invalid memory ordering for a load");                       \
+        CCC_PANIC_MSG("invalid memory ordering for a load");                   \
     }                                                                          \
                                                                                \
     /* SAFETY: we can cast an immutable ref to `inner` to a mutable pointer, */\
@@ -139,7 +139,7 @@ void impl_prefix##_store(                                                      \
 {                                                                              \
     if (!mem_ord_is_valid_store(ordering)) {                                   \
         /* TODO: format the ordering. */                                       \
-        PANIC_MSG("invalid memory ordering for a store");                      \
+        CCC_PANIC_MSG("invalid memory ordering for a store");                  \
     }                                                                          \
                                                                                \
     /* SAFETY: we can cast an immutable ref to `inner` to a mutable pointer, */\
@@ -176,14 +176,14 @@ _ccc_def_atomic(AtomicBool, bool, bool, atomic_bool)
 #define ATOMIC_BOOL_CREATE_FALSE()   ((AtomicBool){ .inner = false, })
 #define ATOMIC_BOOL_CREATE_DEFAULT() ATOMIC_BOOL_CREATE_FALSE()
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 AtomicBool atomic_bool_create(bool const inner)
 {
-    ASSERT_MSG(inner == false || inner == true, "invalid boolean value");
+    CCC_ASSERT_MSG(inner == false || inner == true, "invalid boolean value");
     return (AtomicBool){ .inner = inner };
 }
 
-INLINE_ALWAYS
+CCC_INLINE_ALWAYS
 AtomicBool atomic_bool_create_default(void)
 {
     return ATOMIC_BOOL_CREATE_DEFAULT();

@@ -80,6 +80,10 @@ CCC reserves anything that starts with `ccc_`, `_ccc_`, `__ccc_`, `CCC_`,
 `_CCC_` or `__CCC_`, in addition to the keywords found in
 [RESERVED_KEYWORDS.txt](RESERVED_KEYWORDS.txt).
 
+Additional short-hand (non-prefixed) definitions can be imported from
+`prelude.h`. Users can also undefine those that are not needed/clash with
+existing identifiers and use the prefixed ones instead.
+
 Please note that at this stage, this is subject to massive changes.
 
 ## Imported libC Headers

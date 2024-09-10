@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ccc/format.h"
-#include "ccc/meta.h"
+#include "ccc/prelude.h"
 
 
 typedef struct {
@@ -25,19 +25,17 @@ FmtResult buf_fmt_write_str(void ref_mut const void_ctx, str const s)
     Slice_u8 const bytes = str_as_bytes(s);
     BufFormatter ref_mut const ctx = void_ctx;
 
-    SliceMut_u8 const buf = array_u8_as_mut(&ctx->buf);
-
-    if (ctx->len + bytes.len > buf.len) {
+    if (ctx->len + bytes.len > ctx->buf.len) {
         return (FmtResult) ERR((FmtError){
             .kind      = FmtErrorKind_FormatterError,
             .fmt_error = BufFmtError_CapacityExceeded,
         });
     }
 
-    ccc_copy_nonoverlapping(buf.dat + ctx->len, bytes.dat, bytes.len);
+    ccc_copy_nonoverlapping(ctx->buf.dat + ctx->len, bytes.dat, bytes.len);
     ctx->len += bytes.len;
 
-    return (FmtResult) OK(unit);
+    return (FmtResult) OK(UNIT);
 }
 
 
@@ -46,18 +44,16 @@ FmtResult buf_fmt_write_char(void ref_mut const void_ctx, char const c)
 {
     BufFormatter ref_mut ctx = void_ctx;
 
-    SliceMut_u8 const buf = array_u8_as_mut(&ctx->buf);
-
-    if (ctx->len >= buf.len) {
+    if (ctx->len >= ctx->buf.len) {
         return (FmtResult) ERR((FmtError){
             .kind      = FmtErrorKind_FormatterError,
             .fmt_error = BufFmtError_CapacityExceeded,
         });
     }
-    buf.dat[ctx->len] = c;
+    ctx->buf.dat[ctx->len] = c;
     ctx->len += 1;
 
-    return (FmtResult) OK(unit);
+    return (FmtResult) OK(UNIT);
 }
 
 
@@ -95,8 +91,6 @@ BufFormatter buf_fmt_create(Array_u8 const buf)
 INLINE_ALWAYS
 str buf_fmt_get_str(BufFormatter ref const self)
 {
-    return (str){
-        .dat = str_from_bytes(array_u8_as_ref(&self->buf)).dat,
-        .len = self->len,
-    };
+    Slice_u8 const slice = array_u8_as_slice(&self->buf);
+    return str_from_bytes(slice_u8_slice(slice, 0, self->len));
 }
